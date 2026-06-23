@@ -22,7 +22,7 @@ jobs:
     - name: 打包 exe
       shell: pwsh
       run: |
-        pyinstaller --onefile --windowed --icon icon.ico --name "Activator" oc_tool.py
+        pyinstaller --onefile --windowed --icon icon.ico --add-data "icon.ico;." --name "Activator" oc_tool.py
         if ($LASTEXITCODE -ne 0) {
           exit $LASTEXITCODE
         }

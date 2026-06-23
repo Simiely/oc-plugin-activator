@@ -8,8 +8,10 @@ from tkinter import filedialog, messagebox
 # ── 路径 ──
 if getattr(sys, 'frozen', False):
     APP_DIR = os.path.dirname(os.path.abspath(sys.executable))
+    RES_DIR = sys._MEIPASS
 else:
     APP_DIR = os.path.dirname(os.path.abspath(__file__))
+    RES_DIR = APP_DIR
 CONFIG_FILE = os.path.join(APP_DIR, "config.json")
 
 
@@ -105,7 +107,7 @@ class App:
         self.config = load_config()
         set_dark_titlebar(root)
         try:
-            root.iconbitmap(default=os.path.join(APP_DIR, "icon.ico"))
+            root.iconbitmap(default=os.path.join(RES_DIR, "icon.ico"))
         except Exception:
             pass
         self.build_ui()
