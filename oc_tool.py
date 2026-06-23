@@ -176,7 +176,7 @@ class App:
 
         # 用户名行
         tk.Label(cfg_grid, text="用户名：", bg=CARD, fg=FG,
-                 font=("Microsoft YaHei", 10)
+                 font=("Microsoft YaHei", 10), width=10, anchor="w"
                  ).grid(row=0, column=0, sticky="e", pady=5)
 
         saved_username = self.config.get("username", "")
@@ -192,8 +192,8 @@ class App:
 
         # octane 目标行
         tk.Label(cfg_grid, text="octane目录：", bg=CARD, fg=FG,
-                 font=("Microsoft YaHei", 10)
-                 ).grid(row=1, column=0, sticky="e", pady=5)
+                 font=("Microsoft YaHei", 10), width=10, anchor="w"
+                 ).grid(row=1, column=0, sticky="e", pady=5, padx=(10, 0))
 
         self.o_var = tk.StringVar(value=self.config.get("octane_target", ""))
         oe = tk.Entry(cfg_grid, textvariable=self.o_var,
