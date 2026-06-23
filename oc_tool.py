@@ -1,7 +1,6 @@
 import os
 import sys
 import shutil
-import subprocess
 import tkinter as tk
 from tkinter import filedialog, messagebox
 
@@ -268,11 +267,20 @@ class App:
         sb.grid(row=0, column=1, sticky="ns")
         self.log_box.config(yscrollcommand=sb.set)
 
-        # ── 底部 ──
-        self.lbl(self.root,
-                 "20260623  /  世界的风吹向你 公众号😄  /  Workbuddy技术支持",
-                 fg="#666", font=("Microsoft YaHei", 8)
-                 ).grid(row=row, column=0, pady=(0, 8)); row += 1
+        # ── 底部（点击可复制开源地址） ──
+        def copy_url(e):
+            self.root.clipboard_clear()
+            self.root.clipboard_append("https://github.com/Simiely/oc-plugin-activator")
+            messagebox.showinfo("", "已复制开源地址")
+
+        url_label = tk.Label(
+            self.root,
+            text="20260623  /  世界的风吹向你  /  Workbuddy技术支持  /  开源软件  /  https://github.com/Simiely/oc-plugin-activator",
+            bg=BG, fg="#888", font=("Microsoft YaHei", 8), cursor="hand2")
+        url_label.grid(row=row, column=0, pady=(0, 8)); row += 1
+        url_label.bind("<Button-1>", copy_url)
+        url_label.bind("<Enter>", lambda e: url_label.config(fg="#aaa"))
+        url_label.bind("<Leave>", lambda e: url_label.config(fg="#888"))
 
     # ── 功能方法 ──
     def refresh(self):
