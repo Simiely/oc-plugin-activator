@@ -234,7 +234,7 @@ class App:
         # "打开文件夹" 右对齐小按钮
         open_row = tk.Frame(inner, bg=CARD)
         open_row.pack(fill="x", pady=(0, 8))
-        tk.Button(open_row, text="⑦ 📂 打开启动路径",
+        tk.Button(open_row, text="⑥ 📂 打开启动路径",
                   command=lambda: self.open_dir(
                       "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\StartUp"),
                   bg="#555", fg="white", relief="flat",
