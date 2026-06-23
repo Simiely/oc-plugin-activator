@@ -144,6 +144,20 @@ class App:
                  fg="white", font=("Microsoft YaHei", 15, "bold")
                  ).grid(row=row, column=0, pady=(18, 0)); row += 1
 
+        # ── 使用说明 ──
+        guide = tk.Frame(self.root, bg=CARD, bd=1, relief="groove")
+        guide.grid(row=row, column=0, padx=16, pady=(0, 6), sticky="ew"); row += 1
+        guide_text = (
+            "使用步骤：① 点击「自动」获取当前用户名  "
+            "② 选择 octane 在 C4D 中的安装目录  "
+            "③ 先「清空」移除残留文件  "
+            "④ 后「复制」部署资源文件\n"
+            "插件失效时，重复③④即可恢复。"
+        )
+        tk.Label(guide, text=guide_text, justify="left",
+                 bg=CARD, fg="#aaa", font=("Microsoft YaHei", 9),
+                 wraplength=460).pack(padx=10, pady=6, fill="x")
+
         # ── 配置卡片 ──
         c1 = tk.Frame(self.root, bg=CARD, bd=1, relief="groove")
         c1.grid(row=row, column=0, padx=16, pady=12, sticky="ew"); row += 1
@@ -214,16 +228,17 @@ class App:
 
         inner = tk.Frame(c3, bg=CARD)
         inner.pack(padx=12, pady=8, fill="x")
-        self.btn(inner, "🗑  清空 OctaneRender 缓存",
-                 self.do_clean, bg=RED).pack(pady=4, fill="x")
 
-        # "打开目录" 小按钮行
+        # "打开文件夹" 右对齐小按钮
         open_row = tk.Frame(inner, bg=CARD)
-        open_row.pack(pady=(0, 6))
+        open_row.pack(fill="x", pady=(0, 8))
         tk.Button(open_row, text="📂 打开 OctaneRender 文件夹",
                   command=self.open_octane_dirs,
                   bg="#555", fg="white", relief="flat",
-                  font=("Microsoft YaHei", 9), padx=8, pady=2).pack()
+                  font=("Microsoft YaHei", 9), padx=8, pady=2).pack(side="right")
+
+        self.btn(inner, "🗑  清空 OctaneRender 残留文件",
+                 self.do_clean, bg=RED).pack(pady=4, fill="x")
 
         self.btn(inner, "📋  复制资源到目标路径",
                  self.do_copy).pack(pady=4, fill="x")
@@ -265,8 +280,8 @@ class App:
         o = self.o_var.get().strip()
 
         lines = [
-            f"清空 1：C:\\Users\\{u}\\AppData\\Local\\OctaneRender" if u else "清空 1：(待填写用户名)",
-            f"清空 2：C:\\Users\\{u}\\AppData\\Roaming\\OctaneRender" if u else "清空 2：(待填写用户名)",
+            f"清空残留 1：C:\\Users\\{u}\\AppData\\Local\\OctaneRender" if u else "清空残留 1：(待填写用户名)",
+            f"清空残留 2：C:\\Users\\{u}\\AppData\\Roaming\\OctaneRender" if u else "清空残留 2：(待填写用户名)",
             f"复制 thirdparty  →  C:\\Users\\{u}\\AppData\\Local\\OctaneRender" if u else "复制 thirdparty → (待填写用户名)",
             f"复制 OctaneRender →  C:\\Users\\{u}\\AppData\\Roaming\\OctaneRender" if u else "复制 OctaneRender → (待填写用户名)",
             f"复制 octane  →  {o if o else '(待填写)'}",
