@@ -33,7 +33,7 @@
 
 ## 下载
 
-[Actions 页面](https://github.com/Simiely/oc-plugin-activator/actions) → 最新成功构建 → Artifacts
+[Releases 页面](https://github.com/Simiely/oc-plugin-activator/releases) → 下载最新版 Activator.exe
 
 ---
 
