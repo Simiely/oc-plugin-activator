@@ -171,12 +171,12 @@ class App:
 
         # 配置表单项（grid 对齐）
         cfg_grid = tk.Frame(c1, bg=CARD)
-        cfg_grid.pack(fill="x", padx=(4, 12), pady=(8, 4))
+        cfg_grid.pack(fill="x", padx=0, pady=(8, 4))
         cfg_grid.columnconfigure(1, weight=1)
 
         # 用户名行
         tk.Label(cfg_grid, text="用户名：", bg=CARD, fg=FG,
-                 font=("Microsoft YaHei", 10), anchor="e", width=18
+                 font=("Microsoft YaHei", 10)
                  ).grid(row=0, column=0, sticky="e", pady=5)
 
         saved_username = self.config.get("username", "")
@@ -192,7 +192,7 @@ class App:
 
         # octane 目标行
         tk.Label(cfg_grid, text="octane目录：", bg=CARD, fg=FG,
-                 font=("Microsoft YaHei", 10), anchor="e", width=18
+                 font=("Microsoft YaHei", 10)
                  ).grid(row=1, column=0, sticky="e", pady=5)
 
         self.o_var = tk.StringVar(value=self.config.get("octane_target", ""))
