@@ -153,6 +153,7 @@ class App:
             "④ 后「复制」部署 thirdparty、OctaneRender 等资源\n"
             "⑤ 保持 YellowStar.exe 程序运行\n"
             "⑥ 运行 C4D 使用 Octane 插件\n"
+            "⑦ (可选) 把 YellowStar 放入启动路径，开机自动运行\n"
             "插件失效时，重复③④即可恢复。"
         )
         tk.Label(guide, text=guide_text, justify="left",
@@ -233,6 +234,11 @@ class App:
         # "打开文件夹" 右对齐小按钮
         open_row = tk.Frame(inner, bg=CARD)
         open_row.pack(fill="x", pady=(0, 8))
+        tk.Button(open_row, text="📂 打开启动路径",
+                  command=lambda: self.open_dir(
+                      "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\StartUp"),
+                  bg="#555", fg="white", relief="flat",
+                  font=("Microsoft YaHei", 9), padx=8, pady=2).pack(side="right", padx=(0, 6))
         tk.Button(open_row, text="📂 打开 OctaneRender 文件夹",
                   command=self.open_octane_dirs,
                   bg="#555", fg="white", relief="flat",
@@ -326,6 +332,13 @@ class App:
             self.config["octane_target"] = p
             save_config(self.config)
             self.refresh()
+
+    def open_dir(self, path):
+        """通用：在资源管理器打开路径"""
+        if open_in_explorer(path):
+            self.log(f"📂 {path}（已在资源管理器打开）")
+        else:
+            self.log(f"  ⚠ 无法打开：{path}")
 
     def open_octane_dirs(self):
         """在资源管理器中打开两个 OctaneRender 目录"""
