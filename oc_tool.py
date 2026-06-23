@@ -1,6 +1,7 @@
 import os
 import sys
 import shutil
+import subprocess
 import tkinter as tk
 from tkinter import filedialog, messagebox
 
@@ -24,6 +25,11 @@ def save_config(config):
     import json
     with open(CONFIG_FILE, "w", encoding="utf-8") as f:
         json.dump(config, f, indent=4, ensure_ascii=False)
+
+
+def auto_username():
+    """自动获取当前 Windows 用户名"""
+    return os.environ.get("USERNAME", "")
 
 
 def safe_clean_folder(path, log_func):
@@ -59,14 +65,24 @@ def safe_copy_folder(src, dst, log_func):
 
 
 def set_dark_titlebar(root):
-    """Windows 10/11 深色标题栏"""
     try:
         from ctypes import windll, c_int, byref
         HWND = windll.user32.GetParent(root.winfo_id())
         windll.dwmapi.DwmSetWindowAttribute(
             HWND, 20, byref(c_int(2)), c_int(4))
     except Exception:
-        pass  # 非 Windows 或旧版本忽略
+        pass
+
+
+def open_in_explorer(path):
+    """在资源管理器中打开路径，不存在则先创建"""
+    try:
+        if not os.path.exists(path):
+            os.makedirs(path, exist_ok=True)
+        os.startfile(path)
+        return True
+    except Exception as e:
+        return False
 
 
 # ── 颜色 ──
@@ -82,15 +98,14 @@ class App:
     def __init__(self, root):
         self.root = root
         self.root.title("OC插件 快速激活工具")
-        self.root.geometry("520x560")
-        self.root.minsize(460, 480)
+        self.root.geometry("520x580")
+        self.root.minsize(460, 500)
         self.root.configure(bg=BG)
 
         self.config = load_config()
         set_dark_titlebar(root)
         self.build_ui()
 
-    # ── 工具方法 ──
     def lbl(self, parent, text, fg=FG, bg=None, font=None, side=None):
         w = tk.Label(parent, text=text, bg=bg or BG, fg=fg,
                      font=font or ("Microsoft YaHei", 10))
@@ -98,10 +113,10 @@ class App:
             w.pack(side=side)
         return w
 
-    def btn(self, parent, text, cmd, bg=BLUE, fg="white"):
+    def btn(self, parent, text, cmd, bg=BLUE, fg="white", font_size=11):
         b = tk.Button(parent, text=text, command=cmd,
                       bg=bg, fg=fg, activebackground="#555", activeforeground=fg,
-                      font=("Microsoft YaHei", 11, "bold"),
+                      font=("Microsoft YaHei", font_size, "bold"),
                       relief="flat", cursor="hand2")
         b.bind("<Enter>", lambda e: b.config(bg="#555"))
         b.bind("<Leave>", lambda e: b.config(bg=bg))
@@ -119,12 +134,9 @@ class App:
             return None
         return u
 
-    # ── 构建界面 ──
     def build_ui(self):
-        # 让 root 网格可扩展
         self.root.grid_rowconfigure(5, weight=1)
         self.root.grid_columnconfigure(0, weight=1)
-
         row = 0
 
         # ── 标题 ──
@@ -142,12 +154,25 @@ class App:
         r1 = tk.Frame(c1, bg=CARD)
         r1.pack(fill="x", padx=12, pady=(8, 4))
         self.lbl(r1, "用户名：", bg=CARD, side="left")
-        self.u_var = tk.StringVar(value=self.config.get("username", ""))
-        ue = tk.Entry(r1, textvariable=self.u_var, width=24,
+
+        # 自动获取用户名：配置有值就用配置的，否则自动获取
+        saved_username = self.config.get("username", "")
+        if saved_username:
+            default_username = saved_username
+        else:
+            default_username = auto_username()
+
+        self.u_var = tk.StringVar(value=default_username)
+        ue = tk.Entry(r1, textvariable=self.u_var, width=22,
                       bg=INPUT, fg=FG, insertbackground=FG,
                       relief="flat", bd=2)
         ue.pack(side="left", padx=8)
         ue.bind("<KeyRelease>", lambda e: self.refresh())
+
+        # 自动获取按钮
+        tk.Button(r1, text="自动", command=self.fill_username,
+                  bg="#555", fg="white", relief="flat",
+                  font=("Microsoft YaHei", 9), padx=6, pady=1).pack(side="left")
 
         # octane 目标行
         r2 = tk.Frame(c1, bg=CARD)
@@ -191,10 +216,19 @@ class App:
         inner.pack(padx=12, pady=8, fill="x")
         self.btn(inner, "🗑  清空 OctaneRender 缓存",
                  self.do_clean, bg=RED).pack(pady=4, fill="x")
+
+        # "打开目录" 小按钮行
+        open_row = tk.Frame(inner, bg=CARD)
+        open_row.pack(pady=(0, 6))
+        tk.Button(open_row, text="📂 打开 OctaneRender 文件夹",
+                  command=self.open_octane_dirs,
+                  bg="#555", fg="white", relief="flat",
+                  font=("Microsoft YaHei", 9), padx=8, pady=2).pack()
+
         self.btn(inner, "📋  复制资源到目标路径",
                  self.do_copy).pack(pady=4, fill="x")
 
-        # ── 日志区（可伸缩） ──
+        # ── 日志区 ──
         c4 = tk.Frame(self.root, bg=CARD, bd=1, relief="groove")
         c4.grid(row=row, column=0, padx=16, pady=(0, 10), sticky="nsew")
         c4.grid_rowconfigure(2, weight=1)
@@ -219,9 +253,9 @@ class App:
         sb.grid(row=0, column=1, sticky="ns")
         self.log_box.config(yscrollcommand=sb.set)
 
-        # ── 底部路径提示 ──
+        # ── 底部 ──
         self.lbl(self.root,
-                 f"程序目录：{APP_DIR}  |  请将 thirdparty、OctaneRender、octane 放在此处",
+                 f"程序目录：{APP_DIR}",
                  fg="#888", font=("Microsoft YaHei", 8)
                  ).grid(row=row, column=0, pady=(0, 6)); row += 1
 
@@ -247,6 +281,13 @@ class App:
         self.config["octane_target"] = self.o_var.get().strip()
         save_config(self.config)
 
+    def fill_username(self):
+        """自动获取并填入用户名"""
+        name = auto_username()
+        if name:
+            self.u_var.set(name)
+            self.refresh()
+
     def pick_oct(self):
         p = filedialog.askdirectory(title="选择 octane 复制目标")
         if p:
@@ -254,6 +295,22 @@ class App:
             self.config["octane_target"] = p
             save_config(self.config)
             self.refresh()
+
+    def open_octane_dirs(self):
+        """在资源管理器中打开两个 OctaneRender 目录"""
+        u = self.u_var.get().strip()
+        if not u:
+            messagebox.showerror("错误", "请先填写用户名！")
+            return
+        paths = [
+            f"C:\\Users\\{u}\\AppData\\Local\\OctaneRender",
+            f"C:\\Users\\{u}\\AppData\\Roaming\\OctaneRender",
+        ]
+        for p in paths:
+            if open_in_explorer(p):
+                self.log(f"📂 {p}（已在资源管理器打开）")
+            else:
+                self.log(f"  ⚠ 无法打开：{p}")
 
     def do_clean(self):
         u = self.get_user()
@@ -297,30 +354,30 @@ class App:
                 f"继续吗？"):
             return
 
-        # 1. 复制 thirdparty → C:\Users\{u}\AppData\Local\OctaneRender
+        # 1. thirdparty
         if os.path.exists(src_3rd):
             dst = f"C:\\Users\\{u}\\AppData\\Local\\OctaneRender\\thirdparty"
             self.log(f"[thirdparty] → {dst}")
             safe_copy_folder(src_3rd, dst, self.log)
         else:
-            self.log(f"  ⚠ 当前目录下没有 thirdparty 文件夹，跳过")
+            self.log(f"  ⚠ 当前目录下没有 thirdparty 文件夹")
             self.log(f"     查找路径：{src_3rd}")
 
-        # 2. 复制 OctaneRender → C:\Users\{u}\AppData\Roaming\OctaneRender
+        # 2. OctaneRender
         if os.path.exists(src_or):
             dst = f"C:\\Users\\{u}\\AppData\\Roaming\\OctaneRender"
             self.log(f"[OctaneRender] → {dst}")
             safe_copy_folder(src_or, dst, self.log)
         else:
-            self.log(f"  ⚠ 当前目录下没有 OctaneRender 文件夹，跳过")
+            self.log(f"  ⚠ 当前目录下没有 OctaneRender 文件夹")
             self.log(f"     查找路径：{src_or}")
 
-        # 3. 复制 octane → 用户指定路径
+        # 3. octane
         if os.path.exists(src_oct):
             self.log(f"[octane] → {ot}")
             safe_copy_folder(src_oct, os.path.join(ot, "octane"), self.log)
         else:
-            self.log(f"  ⚠ 当前目录下没有 octane 文件夹，跳过")
+            self.log(f"  ⚠ 当前目录下没有 octane 文件夹")
             self.log(f"     查找路径：{src_oct}")
 
         self.log("✅ 全部完成\n")
