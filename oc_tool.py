@@ -152,8 +152,6 @@ class App:
         username = self.username_var.get().strip()
         target = self.target_var.get().strip()
         local_path = f"C:\\Users\\{username}\\AppData\\Local\\OctaneRender" if username else "(请填写用户名)"
-        roam_path = f"C:\\Users\\username}\\AppData\\Roaming\\OctaneRender" if username else "(请填写用户名)"
-        # 修正 roaming 路径
         roam_path = f"C:\\Users\\{username}\\AppData\\Roaming\\OctaneRender" if username else "(请填写用户名)"
         appdata_src = os.path.join(APP_DIR, "AppData")
         c4d_src = os.path.join(APP_DIR, "c4doctane")
