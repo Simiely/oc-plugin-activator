@@ -151,7 +151,7 @@ class App:
                  bg=CARD, fg="#ffcc00", font=("Microsoft YaHei", 10, "bold")
                  ).pack(pady=(6, 2), padx=10, fill="x")
         guide_text = (
-            "① 选择 octane 插件在 C4D 中的存放目录\n"
+            "① 在 C4D 中配置 octane 插件目录\n"
             "② 先「清空」移除 OctaneRender 残留文件\n"
             "③ 后「复制」部署 thirdparty、OctaneRender 等资源\n"
             "④ 保持 YellowStar.exe 程序运行\n"
@@ -191,7 +191,7 @@ class App:
                  font=("Microsoft YaHei", 9)).grid(row=0, column=2, pady=5)
 
         # octane 目标行
-        tk.Label(cfg_grid, text="octane插件 存放目录：", bg=CARD, fg=FG,
+        tk.Label(cfg_grid, text="octane目录：", bg=CARD, fg=FG,
                  font=("Microsoft YaHei", 10), anchor="e", width=18
                  ).grid(row=1, column=0, sticky="e", pady=5)
 
