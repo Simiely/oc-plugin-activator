@@ -256,6 +256,8 @@ class App:
         c4 = tk.Frame(self.root, bg=CARD, bd=1, relief="groove", height=140)
         c4.grid_propagate(False)
         c4.grid(row=row, column=0, padx=16, pady=(0, 10), sticky="ew")
+        c4.grid_rowconfigure(1, weight=1)
+        c4.grid_columnconfigure(0, weight=1)
         row += 1
 
         self.lbl(c4, "操作日志", fg="white",
