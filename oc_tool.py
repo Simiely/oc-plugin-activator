@@ -221,7 +221,7 @@ class App:
 
         # ── 底部路径提示 ──
         self.lbl(self.root,
-                 f"程序目录：{APP_DIR}  |  AppData：{os.path.join(APP_DIR, 'AppData')}",
+                 f"程序目录：{APP_DIR}  |  请将 thirdparty、OctaneRender、octane 放在此处",
                  fg="#888", font=("Microsoft YaHei", 8)
                  ).grid(row=row, column=0, pady=(0, 6)); row += 1
 
@@ -230,16 +230,12 @@ class App:
         u = self.u_var.get().strip()
         o = self.o_var.get().strip()
 
-        def path_with(src_label, src_path, dst):
-            return f"{src_label}：{src_path}  →  {dst}"
-
         lines = [
             f"清空 1：C:\\Users\\{u}\\AppData\\Local\\OctaneRender" if u else "清空 1：(待填写用户名)",
             f"清空 2：C:\\Users\\{u}\\AppData\\Roaming\\OctaneRender" if u else "清空 2：(待填写用户名)",
-            path_with("AppData", os.path.join(APP_DIR, "AppData"),
-                      f"C:\\Users\\{u}\\AppData" if u else "(待填写)"),
-            path_with("octane", os.path.join(APP_DIR, "octane"),
-                      o if o else "(待填写)"),
+            f"复制 thirdparty  →  C:\\Users\\{u}\\AppData\\Local\\OctaneRender" if u else "复制 thirdparty → (待填写用户名)",
+            f"复制 OctaneRender →  C:\\Users\\{u}\\AppData\\Roaming\\OctaneRender" if u else "复制 OctaneRender → (待填写用户名)",
+            f"复制 octane  →  {o if o else '(待填写)'}",
         ]
         self.pv.config(state="normal")
         self.pv.delete("1.0", "end")
@@ -288,48 +284,44 @@ class App:
             messagebox.showerror("错误", "请填写 octane 复制目标路径！")
             return
 
-        src_a = os.path.join(APP_DIR, "AppData")
-        src_o = os.path.join(APP_DIR, "octane")
+        src_3rd = os.path.join(APP_DIR, "thirdparty")
+        src_or = os.path.join(APP_DIR, "OctaneRender")
+        src_oct = os.path.join(APP_DIR, "octane")
 
         if not messagebox.askyesno(
                 "确认复制",
-                f"从当前程序目录复制：\n\n"
-                f"AppData → C:\\Users\\{u}\\AppData\n"
-                f"octane  → {ot}\n\n"
-                f"程序目录：{APP_DIR}\n"
+                f"将从程序目录复制：\n\n"
+                f"thirdparty  →  C:\\Users\\{u}\\AppData\\Local\\OctaneRender\n"
+                f"OctaneRender →  C:\\Users\\{u}\\AppData\\Roaming\\OctaneRender\n"
+                f"octane      →  {ot}\n\n"
                 f"继续吗？"):
             return
 
-        # 复制 AppData → C:\Users\{u}\AppData
-        if os.path.exists(src_a):
-            self.log(f"[AppData] {src_a} → C:\\Users\\{u}\\AppData")
-            dst = f"C:\\Users\\{u}\\AppData"
-            if not os.path.exists(dst):
-                os.makedirs(dst, exist_ok=True)
-            for item in os.listdir(src_a):
-                s = os.path.join(src_a, item)
-                d = os.path.join(dst, item)
-                try:
-                    if os.path.isfile(s):
-                        shutil.copy2(s, d)
-                        self.log(f"  file: {item}")
-                    else:
-                        shutil.copytree(s, d, dirs_exist_ok=True)
-                        self.log(f"  dir:  {item}")
-                except Exception as e:
-                    self.log(f"  ⚠ 跳过：{item}（{e}）")
-            self.log("  ✅ AppData 完成")
+        # 1. 复制 thirdparty → C:\Users\{u}\AppData\Local\OctaneRender
+        if os.path.exists(src_3rd):
+            dst = f"C:\\Users\\{u}\\AppData\\Local\\OctaneRender\\thirdparty"
+            self.log(f"[thirdparty] → {dst}")
+            safe_copy_folder(src_3rd, dst, self.log)
         else:
-            self.log(f"  ⚠ 当前目录下没有 AppData 文件夹，跳过")
-            self.log(f"     查找路径：{src_a}")
+            self.log(f"  ⚠ 当前目录下没有 thirdparty 文件夹，跳过")
+            self.log(f"     查找路径：{src_3rd}")
 
-        # 复制 octane → 用户指定路径
-        if os.path.exists(src_o):
-            self.log(f"[octane] {src_o} → {ot}")
-            safe_copy_folder(src_o, os.path.join(ot, "octane"), self.log)
+        # 2. 复制 OctaneRender → C:\Users\{u}\AppData\Roaming\OctaneRender
+        if os.path.exists(src_or):
+            dst = f"C:\\Users\\{u}\\AppData\\Roaming\\OctaneRender"
+            self.log(f"[OctaneRender] → {dst}")
+            safe_copy_folder(src_or, dst, self.log)
+        else:
+            self.log(f"  ⚠ 当前目录下没有 OctaneRender 文件夹，跳过")
+            self.log(f"     查找路径：{src_or}")
+
+        # 3. 复制 octane → 用户指定路径
+        if os.path.exists(src_oct):
+            self.log(f"[octane] → {ot}")
+            safe_copy_folder(src_oct, os.path.join(ot, "octane"), self.log)
         else:
             self.log(f"  ⚠ 当前目录下没有 octane 文件夹，跳过")
-            self.log(f"     查找路径：{src_o}")
+            self.log(f"     查找路径：{src_oct}")
 
         self.log("✅ 全部完成\n")
 

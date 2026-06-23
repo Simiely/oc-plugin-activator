@@ -9,7 +9,7 @@
 | 按钮 | 操作 |
 |------|------|
 | 🗑  清空 OctaneRender 缓存 | 清空 `Local\OctaneRender` + `Roaming\OctaneRender` |
-| 📋  复制资源到目标路径 | 复制 `AppData` → `C:\Users\{用户名}` + 复制 `octane` → 指定路径 |
+| 📋  复制资源到目标路径 | 复制 `thirdparty` → `Local\OctaneRender` + `OctaneRender` → `Roaming\OctaneRender` + `octane` → 指定路径 |
 
 ## 使用方法
 
@@ -27,6 +27,6 @@
 ## 注意事项
 
 - 清空**不可撤销**
-- `AppData` 和 `octane` 文件夹需和 exe 在同一目录
+- `thirdparty`、`OctaneRender` 和 `octane` 文件夹需和 exe 在同一目录
 - 窗口可自由拉伸
 - Windows 10/11 支持深色标题栏
