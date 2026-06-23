@@ -157,7 +157,7 @@ class App:
             "④ 保持 YellowStar.exe 程序运行\n"
             "⑤ 运行 C4D 使用 Octane 插件\n"
             "⑥ (可选) 把 YellowStar 放入启动路径，开机自动运行\n"
-            "插件失效时，重复②③即可恢复。"
+            "插件失效时，重复 ② ③ 即可恢复。"
         )
         tk.Label(guide, text=guide_text, justify="left",
                  bg=CARD, fg="#aaa", font=("Microsoft YaHei", 12),
