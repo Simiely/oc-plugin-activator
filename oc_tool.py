@@ -104,10 +104,13 @@ class App:
 
         self.config = load_config()
         set_dark_titlebar(root)
-        try:
-            root.iconbitmap(os.path.join(APP_DIR, "icon.ico"))
-        except Exception:
-            pass
+        # 尝试加载窗口图标
+        icon_path = os.path.join(APP_DIR, "icon.ico")
+        if os.path.exists(icon_path):
+            try:
+                root.iconbitmap(icon_path)
+            except Exception:
+                pass
         self.build_ui()
 
     def lbl(self, parent, text, fg=FG, bg=None, font=None, side=None):
@@ -349,14 +352,13 @@ class App:
             self.check_plugins_path(p)
 
     def check_plugins_path(self, path):
-        """检查路径末尾是否为 plugins，否则弹出提醒"""
         if not path:
             return
         folder = os.path.basename(path)
         if folder.lower() != "plugins":
             messagebox.showwarning(
-                "确认文件夹",
-                f"选择的文件夹名���不是「plugins」，请确认是否选对目录。\n\n当前选择：{path}\n\n如果确认无误，点击确定继续。")
+                "确认",
+                f"未选择 plugins 文件夹，请确认路径是否正确。\n\n当前：{path}\n\n如确认无误，点击确定继续。")
 
     def open_dir(self, path):
         """通用：在资源管理器打开路径"""
