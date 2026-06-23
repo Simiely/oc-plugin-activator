@@ -104,6 +104,10 @@ class App:
 
         self.config = load_config()
         set_dark_titlebar(root)
+        try:
+            root.iconbitmap(os.path.join(APP_DIR, "icon.ico"))
+        except Exception:
+            pass
         self.build_ui()
 
     def lbl(self, parent, text, fg=FG, bg=None, font=None, side=None):
