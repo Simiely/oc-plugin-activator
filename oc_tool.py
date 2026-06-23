@@ -98,8 +98,8 @@ class App:
     def __init__(self, root):
         self.root = root
         self.root.title("OC插件 快速激活工具")
-        self.root.geometry("520x580")
-        self.root.minsize(460, 500)
+        self.root.geometry("600x980")
+        self.root.minsize(600, 700)
         self.root.configure(bg=BG)
 
         self.config = load_config()
@@ -148,15 +148,15 @@ class App:
         guide = tk.Frame(self.root, bg=CARD, bd=1, relief="groove")
         guide.grid(row=row, column=0, padx=16, pady=(0, 6), sticky="ew"); row += 1
         guide_text = (
-            "使用步骤：① 点击「自动」获取当前用户名  "
-            "② 选择 octane 在 C4D 中的安装目录  "
-            "③ 先「清空」移除残留文件  "
-            "④ 后「复制」部署资源文件\n"
+            "① 点击「自动」获取当前 Windows 用户名\n"
+            "② 选择 octane 在 C4D 中的安装目录\n"
+            "③ 先「清空」移除 OctaneRender 残留文件\n"
+            "④ 后「复制」部署 thirdparty、OctaneRender 等资源\n"
             "插件失效时，重复③④即可恢复。"
         )
         tk.Label(guide, text=guide_text, justify="left",
                  bg=CARD, fg="#aaa", font=("Microsoft YaHei", 9),
-                 wraplength=460).pack(padx=10, pady=6, fill="x")
+                 wraplength=530).pack(padx=10, pady=6, fill="x")
 
         # ── 配置卡片 ──
         c1 = tk.Frame(self.root, bg=CARD, bd=1, relief="groove")
@@ -184,7 +184,7 @@ class App:
         ue.bind("<KeyRelease>", lambda e: self.refresh())
 
         # 自动获取按钮
-        tk.Button(r1, text="自动", command=self.fill_username,
+        tk.Button(r1, text="① 自动", command=self.fill_username,
                   bg="#555", fg="white", relief="flat",
                   font=("Microsoft YaHei", 9), padx=6, pady=1).pack(side="left")
 
@@ -198,7 +198,7 @@ class App:
                       relief="flat", bd=2)
         oe.pack(side="left", padx=8)
         oe.bind("<KeyRelease>", lambda e: self.refresh())
-        tk.Button(r2, text="浏览", command=self.pick_oct,
+        tk.Button(r2, text="② 浏览", command=self.pick_oct,
                   bg="#555", fg="white", relief="flat",
                   font=("Microsoft YaHei", 9), padx=6, pady=1).pack(side="left")
 
@@ -237,10 +237,10 @@ class App:
                   bg="#555", fg="white", relief="flat",
                   font=("Microsoft YaHei", 9), padx=8, pady=2).pack(side="right")
 
-        self.btn(inner, "🗑  清空 OctaneRender 残留文件",
+        self.btn(inner, "③ 清空 OctaneRender 残留文件",
                  self.do_clean, bg=RED).pack(pady=4, fill="x")
 
-        self.btn(inner, "📋  复制资源到目标路径",
+        self.btn(inner, "④ 复制资源到目标路径",
                  self.do_copy).pack(pady=4, fill="x")
 
         # ── 日志区 ──
