@@ -104,13 +104,10 @@ class App:
 
         self.config = load_config()
         set_dark_titlebar(root)
-        # 尝试加载窗口图标
-        icon_path = os.path.join(APP_DIR, "icon.ico")
-        if os.path.exists(icon_path):
-            try:
-                root.iconbitmap(icon_path)
-            except Exception:
-                pass
+        try:
+            root.iconbitmap(default=os.path.join(APP_DIR, "icon.ico"))
+        except Exception:
+            pass
         self.build_ui()
 
     def lbl(self, parent, text, fg=FG, bg=None, font=None, side=None):
