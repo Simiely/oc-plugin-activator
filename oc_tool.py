@@ -169,40 +169,42 @@ class App:
         self.lbl(c1, "配置", fg="white", font=("Microsoft YaHei", 10, "bold")
                  ).pack(pady=(8, 0))
 
+        # 配置表单项（grid 对齐）
+        cfg_grid = tk.Frame(c1, bg=CARD)
+        cfg_grid.pack(fill="x", padx=12, pady=(8, 4))
+        cfg_grid.columnconfigure(1, weight=1)
+
         # 用户名行
-        r1 = tk.Frame(c1, bg=CARD)
-        r1.pack(fill="x", padx=12, pady=(8, 4))
-        self.lbl(r1, "用户名：", bg=CARD, side="left")
+        tk.Label(cfg_grid, text="用户名：", bg=CARD, fg=FG,
+                 font=("Microsoft YaHei", 10), anchor="e", width=18
+                 ).grid(row=0, column=0, sticky="e", pady=5)
 
-        # 自动获取用户名：配置有值就用配置的，否则自动获取
         saved_username = self.config.get("username", "")
-        if saved_username:
-            default_username = saved_username
-        else:
-            default_username = auto_username()
-
+        default_username = saved_username if saved_username else auto_username()
         self.u_var = tk.StringVar(value=default_username)
-        ue = tk.Entry(r1, textvariable=self.u_var, width=22,
+        ue = tk.Entry(cfg_grid, textvariable=self.u_var,
                       bg=INPUT, fg=FG, insertbackground=FG,
                       relief="flat", bd=2)
-        ue.pack(side="left", padx=(8, 4))
+        ue.grid(row=0, column=1, sticky="ew", padx=(8, 4), pady=5)
         ue.bind("<KeyRelease>", lambda e: self.refresh())
-        tk.Label(r1, text="（已自动获取）", bg=CARD, fg="#888",
-                 font=("Microsoft YaHei", 9)).pack(side="left")
+        tk.Label(cfg_grid, text="（已自动获取）", bg=CARD, fg="#888",
+                 font=("Microsoft YaHei", 9)).grid(row=0, column=2, pady=5)
 
         # octane 目标行
-        r2 = tk.Frame(c1, bg=CARD)
-        r2.pack(fill="x", padx=12, pady=(4, 4))
-        self.lbl(r2, "octane插件 存放目录：", bg=CARD, side="left")
+        tk.Label(cfg_grid, text="octane插件 存放目录：", bg=CARD, fg=FG,
+                 font=("Microsoft YaHei", 10), anchor="e", width=18
+                 ).grid(row=1, column=0, sticky="e", pady=5)
+
         self.o_var = tk.StringVar(value=self.config.get("octane_target", ""))
-        oe = tk.Entry(r2, textvariable=self.o_var,
+        oe = tk.Entry(cfg_grid, textvariable=self.o_var,
                       bg=INPUT, fg=FG, insertbackground=FG,
                       relief="flat", bd=2)
-        oe.pack(side="left", fill="x", expand=True, padx=8)
+        oe.grid(row=1, column=1, sticky="ew", padx=(8, 4), pady=5)
         oe.bind("<KeyRelease>", lambda e: self.refresh())
-        tk.Button(r2, text="① 浏览", command=self.pick_oct,
+        tk.Button(cfg_grid, text="① 浏览", command=self.pick_oct,
                   bg="#555", fg="white", relief="flat",
-                  font=("Microsoft YaHei", 9), padx=6, pady=1).pack(side="right")
+                  font=("Microsoft YaHei", 9), padx=6, pady=1
+                  ).grid(row=1, column=2, pady=5)
 
         # 保存按钮
         btn_save = tk.Button(c1, text="保存配置", command=self.save_cfg,
