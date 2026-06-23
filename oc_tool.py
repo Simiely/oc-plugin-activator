@@ -151,6 +151,8 @@ class App:
             "② 选择 octane 在 C4D 中的安装目录\n"
             "③ 先「清空」移除 OctaneRender 残留文件\n"
             "④ 后「复制」部署 thirdparty、OctaneRender 等资源\n"
+            "⑤ 保持 YellowStar.exe 程序运行\n"
+            "⑥ 运行 C4D 使用 Octane 插件\n"
             "插件失效时，重复③④即可恢复。"
         )
         tk.Label(guide, text=guide_text, justify="left",
@@ -267,20 +269,25 @@ class App:
         sb.grid(row=0, column=1, sticky="ns")
         self.log_box.config(yscrollcommand=sb.set)
 
-        # ── 底部（点击可复制开源地址） ──
+        url_label1 = tk.Label(
+            self.root,
+            text="20260623  /  世界的风吹向你  /  Workbuddy技术支持  /  开源软件",
+            bg=BG, fg="#888", font=("Microsoft YaHei", 8))
+        url_label1.grid(row=row, column=0, pady=(0, 0)); row += 1
+
         def copy_url(e):
             self.root.clipboard_clear()
             self.root.clipboard_append("https://github.com/Simiely/oc-plugin-activator")
             messagebox.showinfo("", "已复制开源地址")
 
-        url_label = tk.Label(
+        url_label2 = tk.Label(
             self.root,
-            text="20260623  /  世界的风吹向你  /  Workbuddy技术支持  /  开源软件  /  https://github.com/Simiely/oc-plugin-activator",
+            text="https://github.com/Simiely/oc-plugin-activator",
             bg=BG, fg="#888", font=("Microsoft YaHei", 8), cursor="hand2")
-        url_label.grid(row=row, column=0, pady=(0, 8)); row += 1
-        url_label.bind("<Button-1>", copy_url)
-        url_label.bind("<Enter>", lambda e: url_label.config(fg="#aaa"))
-        url_label.bind("<Leave>", lambda e: url_label.config(fg="#888"))
+        url_label2.grid(row=row, column=0, pady=(0, 8)); row += 1
+        url_label2.bind("<Button-1>", copy_url)
+        url_label2.bind("<Enter>", lambda e: url_label2.config(fg="#aaa"))
+        url_label2.bind("<Leave>", lambda e: url_label2.config(fg="#888"))
 
     # ── 功能方法 ──
     def refresh(self):
