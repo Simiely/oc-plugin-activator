@@ -17,47 +17,19 @@ jobs:
         python-version: '3.11'
 
     - name: 安装依赖
-      run: |
-        pip install pyinstaller
+      run: pip install pyinstaller
 
-    - name: 打包（捕获完整错误输出）
+    - name: 打包 exe
       shell: pwsh
       run: |
-        # 逐个步骤测试，定位具体失败位置
-        echo "1. 测试 Python"
-        python -c "import tkinter; print('tkinter OK')" 2>&1
-        echo "exit=$LASTEXITCODE"
-
-        echo "2. 运行 PyInstaller"
-        # 将完整输出重定向到文件
-        pyinstaller --onefile --console --name "Activator" oc_tool.py > build_stdout.txt 2> build_stderr.txt
-        $ec = $LASTEXITCODE
-        echo "exit=$ec"
-
-        echo "3. stdout 输出:"
-        Get-Content build_stdout.txt -ErrorAction SilentlyContinue | ForEach-Object { $_ }
-
-        echo "4. stderr 输出:"
-        Get-Content build_stderr.txt -ErrorAction SilentlyContinue | ForEach-Object { $_ }
-
-        if ($ec -ne 0) {
-          exit $ec
+        pyinstaller --onefile --windowed --name "Activator" oc_tool.py
+        if ($LASTEXITCODE -ne 0) {
+          exit $LASTEXITCODE
         }
-
-    - name: 上传日志
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: build-logs
-        path: |
-          build_stdout.txt
-          build_stderr.txt
-          build/
-        if-no-files-found: warn
 
     - name: 上传 exe
       uses: actions/upload-artifact@v4
       with:
         name: OC插件快速激活工具
         path: dist/Activator.exe
-        if-no-files-found: warn
+        if-no-files-found: error
