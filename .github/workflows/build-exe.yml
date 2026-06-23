@@ -12,18 +12,23 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: 使用系统预装 Python
+    - name: 设置 Python（带 tkinter）
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+
+    - name: 检查 tkinter
       shell: pwsh
       run: |
-        # 使用 Windows runner 预装的 Python（自带 tkinter）
-        $pythonPath = Get-Command python | Select-Object -ExpandProperty Source
-        Write-Host "Python 路径: $pythonPath"
         python --version
-        python -c "import tkinter; print('tkinter OK')"
-        python -c "import tkinter; print('tkinter OK')" | Out-Host
+        python -c "import tkinter; print('tkinter OK')" 2>&1
         if ($LASTEXITCODE -ne 0) {
-          Write-Host "系统 Python 无 tkinter，尝试 setup-python..."
-          # 这里不做动作，后续步骤会重新 setup
+          Write-Host "tkinter 不可用，尝试安装完整 Python..."
+          choco install python --version=3.11.9 -y --force 2>&1 | Out-Null
+          $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine")
+          python --version
+          python -c "import tkinter; print('tkinter OK')" 2>&1
         }
 
     - name: 安装 PyInstaller
@@ -34,24 +39,32 @@ jobs:
     - name: 打包 exe
       shell: pwsh
       run: |
-        $ErrorActionPreference = "Stop"
-        Write-Host "===== 开始打包 ====="
-        pyinstaller --onefile --console --name "OC_Activator" oc_tool.py 2>&1
-        Write-Host "===== 退出码: $LASTEXITCODE ====="
-        if ($LASTEXITCODE -ne 0) {
-          throw "PyInstaller 打包失败，退出码: $LASTEXITCODE"
+        # 把完整输出保存到文件，方便排查
+        python -m PyInstaller --onefile --console --name "OC_Activator" oc_tool.py 2>&1 | Tee-Object -FilePath "build_log.txt"
+        $exitCode = $LASTEXITCODE
+        Write-Host "EXIT_CODE=$exitCode"
+        if ($exitCode -ne 0) {
+          Write-Host "=== PyInstaller 日志文件内容 ==="
+          Get-Content "OC_Activator.spec" -ErrorAction SilentlyContinue
+          Write-Host "=== 详细 warn 文件 ==="
+          Get-Content "build\OC_Activator\warn-OC_Activator.txt" -ErrorAction SilentlyContinue
+          exit $exitCode
         }
-        Write-Host "===== 验证 exe ====="
-        if (Test-Path "dist/OC_Activator.exe") {
-          Write-Host "✅ exe 已生成"
-          Get-Item "dist/OC_Activator.exe" | Select-Object Length,FullName
-        } else {
-          throw "exe 文件未生成！"
-        }
+
+    - name: 上传构建日志（失败时）
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-logs
+        path: |
+          build_log.txt
+          build/OC_Activator/warn-*.txt
+          *.spec
+        if-no-files-found: warn
 
     - name: 上传 exe
       uses: actions/upload-artifact@v4
       with:
-        name: OC插件快速激活工具
+        name: OC_Activator.exe
         path: dist/OC_Activator.exe
-        compression-level: 9
+        if-no-files-found: error
