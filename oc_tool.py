@@ -270,9 +270,9 @@ class App:
 
         # ── 底部 ──
         self.lbl(self.root,
-                 f"程序目录：{APP_DIR}",
-                 fg="#888", font=("Microsoft YaHei", 8)
-                 ).grid(row=row, column=0, pady=(0, 6)); row += 1
+                 "20260623  /  世界的风吹向你 公众号😄  /  Workbuddy技术支持",
+                 fg="#666", font=("Microsoft YaHei", 8)
+                 ).grid(row=row, column=0, pady=(0, 8)); row += 1
 
     # ── 功能方法 ──
     def refresh(self):
