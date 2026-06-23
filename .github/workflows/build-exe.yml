@@ -10,58 +10,48 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - name: 检出代码
-      uses: actions/checkout@v4
+    - uses: actions/checkout@v4
 
-    - name: 设置 Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.11'
-
-    - name: 检测环境
+    - name: 使用系统预装 Python
       shell: pwsh
       run: |
+        # 使用 Windows runner 预装的 Python（自带 tkinter）
+        $pythonPath = Get-Command python | Select-Object -ExpandProperty Source
+        Write-Host "Python 路径: $pythonPath"
         python --version
-        pip --version
-        python -c "import tkinter; print('tkinter OK')" 2>&1
-        echo "--- Python 安装路径 ---"
-        where python
-        Get-ChildItem -Path (python -c "import sys; print(sys.prefix)") -Recurse -Filter "tkinter*" -ErrorAction SilentlyContinue | Select-Object FullName
+        python -c "import tkinter; print('tkinter OK')"
+        python -c "import tkinter; print('tkinter OK')" | Out-Host
+        if ($LASTEXITCODE -ne 0) {
+          Write-Host "系统 Python 无 tkinter，尝试 setup-python..."
+          # 这里不做动作，后续步骤会重新 setup
+        }
 
     - name: 安装 PyInstaller
       run: |
         python -m pip install --upgrade pip
         pip install pyinstaller
-        pyinstaller --version
 
-    - name: 打包 exe（带详细日志）
+    - name: 打包 exe
       shell: pwsh
       run: |
-        # 先用英文名试打包，确认基础流程正常
-        pyinstaller --onefile --windowed --name "OC_Activator" oc_tool.py 2>&1
-        Write-Host "Exit code: $LASTEXITCODE"
+        $ErrorActionPreference = "Stop"
+        Write-Host "===== 开始打包 ====="
+        pyinstaller --onefile --console --name "OC_Activator" oc_tool.py 2>&1
+        Write-Host "===== 退出码: $LASTEXITCODE ====="
         if ($LASTEXITCODE -ne 0) {
-          # 如果失败，尝试不带 --windowed 再试
-          Write-Host "首次打包失败，尝试不带 --windowed 参数..."
-          pyinstaller --onefile --name "OC_Activator" oc_tool.py 2>&1
-          Write-Host "Exit code: $LASTEXITCODE"
+          throw "PyInstaller 打包失败，退出码: $LASTEXITCODE"
         }
-      continue-on-error: true
-
-    - name: 检查 dist 目录
-      shell: pwsh
-      run: |
-        if (Test-Path dist) {
-          Get-ChildItem dist
+        Write-Host "===== 验证 exe ====="
+        if (Test-Path "dist/OC_Activator.exe") {
+          Write-Host "✅ exe 已生成"
+          Get-Item "dist/OC_Activator.exe" | Select-Object Length,FullName
         } else {
-          Write-Host "dist 目录不存在"
-          Get-ChildItem -Path . -Filter "*.exe" -Recurse
+          throw "exe 文件未生成！"
         }
 
-    - name: 上传 exe 作为 Artifact
-      if: always()
+    - name: 上传 exe
       uses: actions/upload-artifact@v4
       with:
         name: OC插件快速激活工具
-        path: dist/*.exe
-        if-no-files-found: warn
+        path: dist/OC_Activator.exe
+        compression-level: 9
