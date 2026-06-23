@@ -160,7 +160,7 @@ class App:
             "插件失效时，重复②③即可恢复。"
         )
         tk.Label(guide, text=guide_text, justify="left",
-                 bg=CARD, fg="#aaa", font=("Microsoft YaHei", 9),
+                 bg=CARD, fg="#aaa", font=("Microsoft YaHei", 10),
                  wraplength=530).pack(padx=10, pady=6, fill="x")
 
         # ── 配置卡片 ──
