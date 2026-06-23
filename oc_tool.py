@@ -155,7 +155,7 @@ class App:
                  bg=CARD, fg="#ffcc00", font=("Microsoft YaHei", 10, "bold")
                  ).pack(pady=(6, 2), padx=10, fill="x")
         guide_text = (
-            "① 在 C4D 中配置 octane 插件目录\n"
+            "① 选择 C4D 的插件文件夹 plugins\n"
             "② 先「清空」移除 OctaneRender 残留文件\n"
             "③ 后「复制」部署 thirdparty、OctaneRender 等资源\n"
             "④ 保持 YellowStar.exe 程序运行\n"
@@ -204,7 +204,16 @@ class App:
                       bg=INPUT, fg=FG, insertbackground=FG,
                       relief="flat", bd=2)
         oe.grid(row=1, column=1, sticky="ew", padx=(8, 4), pady=5)
-        oe.bind("<KeyRelease>", lambda e: self.refresh())
+
+        def on_octane_change(*args):
+            self.refresh()
+        self.o_var.trace_add("write", on_octane_change)
+
+        # 手动输入完成后检查路径
+        def check_oct_dir(e):
+            self.check_plugins_path(self.o_var.get().strip())
+        oe.bind("<FocusOut>", check_oct_dir)
+
         tk.Button(cfg_grid, text="① 浏览", command=self.pick_oct,
                   bg="#555", fg="white", relief="flat",
                   font=("Microsoft YaHei", 9), padx=6, pady=1
@@ -337,6 +346,17 @@ class App:
             self.config["octane_target"] = p
             save_config(self.config)
             self.refresh()
+            self.check_plugins_path(p)
+
+    def check_plugins_path(self, path):
+        """检查路径末尾是否为 plugins，否则弹出提醒"""
+        if not path:
+            return
+        folder = os.path.basename(path)
+        if folder.lower() != "plugins":
+            messagebox.showwarning(
+                "确认文件夹",
+                f"选择的文件夹名���不是「plugins」，请确认是否选对目录。\n\n当前选择：{path}\n\n如果确认无误，点击确定继续。")
 
     def open_dir(self, path):
         """通用：在资源管理器打开路径"""
