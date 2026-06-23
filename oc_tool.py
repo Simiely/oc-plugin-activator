@@ -305,13 +305,13 @@ class App:
         # 复制 AppData → C:\Users\{u}\AppData
         if os.path.exists(src_a):
             self.log(f"[AppData] {src_a} → C:\\Users\\{u}\\AppData")
-            try:
-                dst = f"C:\\Users\\{u}\\AppData"
-                if not os.path.exists(dst):
-                    os.makedirs(dst, exist_ok=True)
-                for item in os.listdir(src_a):
-                    s = os.path.join(src_a, item)
-                    d = os.path.join(dst, item)
+            dst = f"C:\\Users\\{u}\\AppData"
+            if not os.path.exists(dst):
+                os.makedirs(dst, exist_ok=True)
+            for item in os.listdir(src_a):
+                s = os.path.join(src_a, item)
+                d = os.path.join(dst, item)
+                try:
                     if os.path.isfile(s):
                         shutil.copy2(s, d)
                         self.log(f"  file: {item}")
@@ -320,9 +320,9 @@ class App:
                             shutil.rmtree(d)
                         shutil.copytree(s, d)
                         self.log(f"  dir:  {item}")
-                self.log("  ✅ AppData 完成")
-            except Exception as e:
-                self.log(f"  ❌ {e}")
+                except Exception as e:
+                    self.log(f"  ⚠ 跳过：{item}（{e}）")
+            self.log("  ✅ AppData 完成")
         else:
             self.log(f"  ⚠ 当前目录下没有 AppData 文件夹，跳过")
             self.log(f"     查找路径：{src_a}")
