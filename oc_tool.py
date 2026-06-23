@@ -50,13 +50,11 @@ def safe_copy_folder(src, dst, log_func):
         log_func(f"  ⚠ 源文件夹不存在：{src}")
         return False
     try:
-        if os.path.exists(dst):
-            shutil.rmtree(dst)
-        shutil.copytree(src, dst)
+        shutil.copytree(src, dst, dirs_exist_ok=True)
         log_func(f"  ✅ 复制完成")
         return True
     except Exception as e:
-        log_func(f"  ❌ {e}")
+        log_func(f"  ⚠ 部分文件跳过（{e}）")
         return False
 
 
@@ -316,9 +314,7 @@ class App:
                         shutil.copy2(s, d)
                         self.log(f"  file: {item}")
                     else:
-                        if os.path.exists(d):
-                            shutil.rmtree(d)
-                        shutil.copytree(s, d)
+                        shutil.copytree(s, d, dirs_exist_ok=True)
                         self.log(f"  dir:  {item}")
                 except Exception as e:
                     self.log(f"  ⚠ 跳过：{item}（{e}）")
