@@ -4,7 +4,7 @@
 
 ```
 oc-plugin-activator/
-├── oc_tool.py                  # 主程序（Python + tkinter GUI）
+├── oc_tool.py                  # 主程序（Python + tkinter GUI，深色模式）
 ├── config.json                 # 用户配置文件（运行后自动生成）
 ├── README.md                   # 使用说明
 ├── DEVELOP.md                  # 本文件
@@ -36,43 +36,50 @@ pyinstaller --onefile --windowed --name "Activator" oc_tool.py
 
 ## GitHub Actions 自动打包
 
-每次向 `main` 分支推送代码，会自动触发打包流程。
+每次向 `main` 分支推送代码，自动触发打包流程。exe 可在 Actions 页面下载。
 
-流程文件：`.github/workflows/build-exe.yml`
+## 核心逻辑
 
-**工作流程：**
-1. 检出代码
-2. 设置 Python 3.11 环境
-3. 安装 PyInstaller
-4. 执行 `pyinstaller --onefile --windowed --name "Activator"`
-5. 上传生成的 exe 为 Artifact
+### 两个核心按钮
 
-**下载地址：** https://github.com/Simiely/oc-plugin-activator/actions
+| 按钮 | 内部操作 |
+|------|---------|
+| **清空 OctaneRender 缓存** | 同时清空 `Local\OctaneRender` 和 `Roaming\OctaneRender` 两个目录 |
+| **复制资源到目标路径** | 同时复制 `AppData` 到 `C:\Users\{用户名}`，复制 `octane` 到配置的路径 |
 
-> ⚠️ 注意：GitHub Actions 的 `actions/checkout@v4`、`actions/setup-python@v5` 等目前使用 Node.js 20（2026 年已弃用），但会被强制在 Node.js 24 上运行，不影响正常使用。后续可升级到 Node.js 24 原生版本。
+### 路径获取（重要）
 
-## 核心逻辑说明
-
-### 路径生成
-
-用户名填写后，以下路径自动生成：
+PyInstaller 打包后，`__file__` 指向临时解压目录，需用 `sys.executable` 获取真实路径：
 
 ```python
-local_path   = f"C:\\Users\\{username}\\AppData\\Local\\OctaneRender"
-roaming_path = f"C:\\Users\\{username}\\AppData\\Roaming\\OctaneRender"
-appdata_dst  = f"C:\\Users\\{username}\\AppData"
+if getattr(sys, 'frozen', False):
+    APP_DIR = os.path.dirname(os.path.abspath(sys.executable))
+else:
+    APP_DIR = os.path.dirname(os.path.abspath(__file__))
 ```
 
-### 安全清空文件夹（`safe_clean_folder`）
+### 安全清空（`safe_clean_folder`）
 
 - 只删除**内容**，不删除文件夹本身
-- 遍历目录下所有文件和子文件夹逐一删除
-- 无权限的文件/文件夹会跳过并提示
+- 遍历所有文件和子文件夹逐一删除
+- 无权限的项目会跳过并提示
 
-### 安全复制文件夹（`safe_copy_folder`）
+### 安全复制（`safe_copy_folder`）
 
 - 目标存在时先删除再复制，确保完全覆盖
 - 使用 `shutil.copytree` 保留目录结构
+
+### 深色主题
+
+使用 `ttk.Style` + `clam` 主题实现深色模式。颜色定义在文件顶部：
+
+```python
+BG = "#1e1e1e"      # 窗口背景
+FG = "#d4d4d4"      # 文字颜色
+FRAME_BG = "#252526" # 框架背景
+ENTRY_BG = "#3c3c3c" # 输入框背景
+BTN_BG = "#0e639c"   # 按钮背景
+```
 
 ### 配置文件
 
@@ -81,57 +88,38 @@ appdata_dst  = f"C:\\Users\\{username}\\AppData"
 ```json
 {
     "username": "Simiely",
-    "c4doctane_target": "D:\\Cinema4D\\plugins"
+    "octane_target": "D:\\plugins\\octane"
 }
 ```
 
-程序启动时自动读取，关闭前保存。
+程序启动时自动读取，保存时自动写入。
 
 ## 修改指南
 
-### 添加新的清空路径
+### 添加新的功能
 
-在 `oc_tool.py` 中添加新的按钮回调，参考现有 `on_clean_local` 的写法：
+1. 在 `setup_ui` 中添加新按钮
+2. 编写对应的回调方法（如 `on_new_function`）
+3. 在 `refresh_preview` 中更新路径预览
+4. 更新 `load_config` / `save_config` 中的默认配置字段
 
-```python
-def on_clean_new_path(self):
-    username = self.get_username()
-    if not username: return
-    path = f"C:\\Users\\{username}\\Some\\New\\Path"
-    # ... 确认弹窗、清空逻辑
-```
+### 修改深色主题颜色
 
-然后在 `setup_ui` 中添加对应的按钮。
+修改文件顶部 `BG`、`FG` 等颜色变量即可全局生效。
 
-### 修改界面样式
+### 注意
 
-`ttk.Style` 支持自定义主题，修改 `setup_ui` 中的配置：
-
-```python
-self.style.configure("Action.TButton", font=("Microsoft YaHei", 11, "bold"), padding=8)
-```
-
-## 常见问题
-
-### 为什么 GitHub Actions 构建显示 Node.js 20 deprecated 警告？
-
-这是 GitHub 平台迁移节点导致的。2026 年 6 月起 Node.js 20 被弃用，GitHub 官方 action 正在陆续升级到 Node.js 24。当前这些 action 仍能正常工作（被强制在 Node.js 24 上运行）。
-
-### Python 打包后 exe 多大？
-
-约 **10 MB**，包含 Python 运行时 + tkinter GUI 库 + 程序代码。
-
-### tkinter 在 Windows 上需要额外安装吗？
-
-不需要。官版 Python for Windows 自带 tkinter。如果使用 GitHub Actions 的 `setup-python`，Python 来自 `actions/python-versions` 构建，同样包含 tkinter。
+- 所有路径使用 `os.path.join` 拼接，确保跨平台兼容
+- 操作前弹出确认弹窗，防止误操作
+- 日志用 `self.log()` 写入，同时显示在界面
 
 ## TODO
 
-- [ ] Node.js 24 原生兼容的 GitHub Actions（升级 `checkout`/`setup-python`/`upload-artifact` 版本）
+- [ ] Node.js 24 原生兼容的 GitHub Actions
 - [ ] 支持拖拽文件夹到界面
 - [ ] 增加操作成功/失败的系统通知
 - [ ] 支持多语言（中/英）
-- [ ] 增加日志文件输出（当前仅在界面显示）
+- [ ] 增加日志文件输出
 - [ ] 数字签名 exe，减少杀软误报
 
 ## 授权
