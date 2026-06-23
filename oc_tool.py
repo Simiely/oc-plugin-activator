@@ -151,7 +151,7 @@ class App:
                  bg=CARD, fg="#ffcc00", font=("Microsoft YaHei", 10, "bold")
                  ).pack(pady=(6, 2), padx=10, fill="x")
         guide_text = (
-            "① 选择 octane 在 C4D 中的安装目录\n"
+            "① 选择 octane 插件在 C4D 中的存放目录\n"
             "② 先「清空」移除 OctaneRender 残留文件\n"
             "③ 后「复制」部署 thirdparty、OctaneRender 等资源\n"
             "④ 保持 YellowStar.exe 程序运行\n"
@@ -185,22 +185,24 @@ class App:
         ue = tk.Entry(r1, textvariable=self.u_var, width=22,
                       bg=INPUT, fg=FG, insertbackground=FG,
                       relief="flat", bd=2)
-        ue.pack(side="left", padx=8)
+        ue.pack(side="left", padx=(8, 4))
         ue.bind("<KeyRelease>", lambda e: self.refresh())
+        tk.Label(r1, text="（已自动获取）", bg=CARD, fg="#888",
+                 font=("Microsoft YaHei", 9)).pack(side="left")
 
         # octane 目标行
         r2 = tk.Frame(c1, bg=CARD)
         r2.pack(fill="x", padx=12, pady=(4, 4))
-        self.lbl(r2, "octane 目标：", bg=CARD, side="left")
+        self.lbl(r2, "octane插件 存放目录：", bg=CARD, side="left")
         self.o_var = tk.StringVar(value=self.config.get("octane_target", ""))
-        oe = tk.Entry(r2, textvariable=self.o_var, width=18,
+        oe = tk.Entry(r2, textvariable=self.o_var,
                       bg=INPUT, fg=FG, insertbackground=FG,
                       relief="flat", bd=2)
-        oe.pack(side="left", padx=8)
+        oe.pack(side="left", fill="x", expand=True, padx=8)
         oe.bind("<KeyRelease>", lambda e: self.refresh())
         tk.Button(r2, text="① 浏览", command=self.pick_oct,
                   bg="#555", fg="white", relief="flat",
-                  font=("Microsoft YaHei", 9), padx=6, pady=1).pack(side="left")
+                  font=("Microsoft YaHei", 9), padx=6, pady=1).pack(side="right")
 
         # 保存按钮
         btn_save = tk.Button(c1, text="保存配置", command=self.save_cfg,
