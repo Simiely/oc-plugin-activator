@@ -290,6 +290,7 @@ class App:
         lines = [
             f"清空残留 1：C:\\Users\\{u}\\AppData\\Local\\OctaneRender" if u else "清空残留 1：(待填写用户名)",
             f"清空残留 2：C:\\Users\\{u}\\AppData\\Roaming\\OctaneRender" if u else "清空残留 2：(待填写用户名)",
+            f"清空残留 3：{o}\\octane" if o else "清空残留 3：(待填写 octane 目标)",
             f"复制 thirdparty  →  C:\\Users\\{u}\\AppData\\Local\\OctaneRender" if u else "复制 thirdparty → (待填写用户名)",
             f"复制 OctaneRender →  C:\\Users\\{u}\\AppData\\Roaming\\OctaneRender" if u else "复制 OctaneRender → (待填写用户名)",
             f"复制 octane  →  {o if o else '(待填写)'}",
@@ -339,13 +340,15 @@ class App:
         u = self.get_user()
         if not u:
             return
+        o = self.o_var.get().strip()
         paths = [
             f"C:\\Users\\{u}\\AppData\\Local\\OctaneRender",
             f"C:\\Users\\{u}\\AppData\\Roaming\\OctaneRender",
         ]
-        if not messagebox.askyesno(
-                "确认清空",
-                f"将清空以下两个目录的所有内容：\n\n{paths[0]}\n{paths[1]}\n\n此操作不可撤销！"):
+        if o:
+            paths.append(os.path.join(o, "octane"))
+        msg = "将清空以下目录的所有内容：\n\n" + "\n".join(paths) + "\n\n此操作不可撤销！"
+        if not messagebox.askyesno("确认清空", msg):
             return
         for p in paths:
             if os.path.exists(p):
