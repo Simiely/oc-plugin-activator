@@ -1,0 +1,6 @@
+{
+    "username": "",
+    "clean_target_dir": "C:\\Users\\{username}\\AppData\\Local\\Temp\\example_dir",
+    "copy_to_dir": "C:\\Users\\{username}\\AppData\\Local\\ExampleApp\\data",
+    "custom_copy_dir": ""
+}
