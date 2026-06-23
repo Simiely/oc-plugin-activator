@@ -12,59 +12,52 @@ jobs:
     steps:
     - uses: actions/checkout@v4
 
-    - name: 设置 Python（带 tkinter）
-      uses: actions/setup-python@v5
+    - uses: actions/setup-python@v5
       with:
         python-version: '3.11'
-        cache: 'pip'
 
-    - name: 检查 tkinter
-      shell: pwsh
+    - name: 安装依赖
       run: |
-        python --version
-        python -c "import tkinter; print('tkinter OK')" 2>&1
-        if ($LASTEXITCODE -ne 0) {
-          Write-Host "tkinter 不可用，尝试安装完整 Python..."
-          choco install python --version=3.11.9 -y --force 2>&1 | Out-Null
-          $env:Path = [System.Environment]::GetEnvironmentVariable("Path","Machine")
-          python --version
-          python -c "import tkinter; print('tkinter OK')" 2>&1
-        }
-
-    - name: 安装 PyInstaller
-      run: |
-        python -m pip install --upgrade pip
         pip install pyinstaller
 
-    - name: 打包 exe
+    - name: 打包（捕获完整错误输出）
       shell: pwsh
       run: |
-        # 把完整输出保存到文件，方便排查
-        python -m PyInstaller --onefile --console --name "OC_Activator" oc_tool.py 2>&1 | Tee-Object -FilePath "build_log.txt"
-        $exitCode = $LASTEXITCODE
-        Write-Host "EXIT_CODE=$exitCode"
-        if ($exitCode -ne 0) {
-          Write-Host "=== PyInstaller 日志文件内容 ==="
-          Get-Content "OC_Activator.spec" -ErrorAction SilentlyContinue
-          Write-Host "=== 详细 warn 文件 ==="
-          Get-Content "build\OC_Activator\warn-OC_Activator.txt" -ErrorAction SilentlyContinue
-          exit $exitCode
+        # 逐个步骤测试，定位具体失败位置
+        echo "1. 测试 Python"
+        python -c "import tkinter; print('tkinter OK')" 2>&1
+        echo "exit=$LASTEXITCODE"
+
+        echo "2. 运行 PyInstaller"
+        # 将完整输出重定向到文件
+        pyinstaller --onefile --console --name "Activator" oc_tool.py > build_stdout.txt 2> build_stderr.txt
+        $ec = $LASTEXITCODE
+        echo "exit=$ec"
+
+        echo "3. stdout 输出:"
+        Get-Content build_stdout.txt -ErrorAction SilentlyContinue | ForEach-Object { $_ }
+
+        echo "4. stderr 输出:"
+        Get-Content build_stderr.txt -ErrorAction SilentlyContinue | ForEach-Object { $_ }
+
+        if ($ec -ne 0) {
+          exit $ec
         }
 
-    - name: 上传构建日志（失败时）
-      if: failure()
+    - name: 上传日志
+      if: always()
       uses: actions/upload-artifact@v4
       with:
         name: build-logs
         path: |
-          build_log.txt
-          build/OC_Activator/warn-*.txt
-          *.spec
+          build_stdout.txt
+          build_stderr.txt
+          build/
         if-no-files-found: warn
 
     - name: 上传 exe
       uses: actions/upload-artifact@v4
       with:
-        name: OC_Activator.exe
-        path: dist/OC_Activator.exe
-        if-no-files-found: error
+        name: OC插件快速激活工具
+        path: dist/Activator.exe
+        if-no-files-found: warn
