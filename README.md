@@ -12,6 +12,7 @@
 | 🗑 清空 OctaneRender (Roaming) | 删除文件夹内所有内容 | `C:\Users\{用户名}\AppData\Roaming\OctaneRender` |
 | 📋 复制 AppData 到用户目录 | 复制程序所在目录下的 `AppData` 文件夹 | → `C:\Users\{用户名}\AppData` |
 | 📋 复制 c4doctane 到目标路径 | 复制程序所在目录下的 `c4doctane` 文件夹 | → 用户自行填写的路径 |
+| 📋 复制 octane 到目标路径 | 复制程序所在目录下的 `octane` 文件夹 | → 用户自行填写的路径 |
 
 ## 快速下载 exe
 
@@ -55,6 +56,7 @@ pyinstaller --onefile --windowed --name "Activator" oc_tool.py
 
 - **用户名**：你的 Windows 用户名（如 `Simiely`），程序会自动拼出对应路径
 - **c4doctane 复制目标路径**：点击「选择文件夹」或手动填写
+- **octane 复制目标路径**：点击「选择文件夹」或手动填写
 
 填写后点击「保存配置」，下次打开自动记住。
 
@@ -63,7 +65,7 @@ pyinstaller --onefile --windowed --name "Activator" oc_tool.py
 ## 注意事项
 
 - 清空文件夹操作**不可撤销**，操作前会弹出确认提示
-- 确保 `AppData` 和 `c4doctane` 文件夹与程序在同一目录下
+- 确保 `AppData`、`c4doctane` 和 `octane` 文件夹与程序在同一目录下
 - 如目标路径不存在，程序会自动创建
 
 ## 开发相关
