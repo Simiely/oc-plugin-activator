@@ -81,9 +81,9 @@ def apply_dark_theme(style):
                      focuscolor="none", borderwidth=0)
     style.map("TButton", background=[("active", BTN_HOVER)])
     style.configure("Action.TButton", font=("Microsoft YaHei", 12, "bold"),
-                     background="#094771", foreground="white", padding=(0, 14))
+                     background="#094771", foreground="white")
     style.map("Action.TButton", background=[("active", BTN_BG)])
-    style.configure("Small.TButton", font=("Microsoft YaHei", 9), padding=(6, 3))
+    style.configure("Small.TButton", font=("Microsoft YaHei", 9))
     style.configure("TEntry", fieldbackground=ENTRY_BG, foreground=FG)
 
 
