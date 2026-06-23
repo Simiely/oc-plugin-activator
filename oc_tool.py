@@ -160,7 +160,7 @@ class App:
             "插件失效时，重复②③即可恢复。"
         )
         tk.Label(guide, text=guide_text, justify="left",
-                 bg=CARD, fg="#aaa", font=("Microsoft YaHei", 10),
+                 bg=CARD, fg="#aaa", font=("Microsoft YaHei", 12),
                  wraplength=530).pack(padx=10, pady=6, fill="x")
 
         # ── 配置卡片 ──
@@ -171,7 +171,7 @@ class App:
 
         # 配置表单项（grid 对齐）
         cfg_grid = tk.Frame(c1, bg=CARD)
-        cfg_grid.pack(fill="x", padx=12, pady=(8, 4))
+        cfg_grid.pack(fill="x", padx=(4, 12), pady=(8, 4))
         cfg_grid.columnconfigure(1, weight=1)
 
         # 用户名行
