@@ -4,7 +4,6 @@ import shutil
 import tkinter as tk
 from tkinter import filedialog, messagebox
 
-# 获取 exe 真实路径
 if getattr(sys, 'frozen', False):
     APP_DIR = os.path.dirname(os.path.abspath(sys.executable))
     CONFIG_FILE = os.path.join(APP_DIR, "config.json")
@@ -31,19 +30,19 @@ def safe_clean_folder(path, log_func):
     if not os.path.exists(path):
         log_func(f"  文件夹不存在，跳过：{path}")
         return
-    count_file = count_dir = 0
+    c1 = c2 = 0
     for item in os.listdir(path):
-        item_path = os.path.join(path, item)
+        p = os.path.join(path, item)
         try:
-            if os.path.isfile(item_path) or os.path.islink(item_path):
-                os.remove(item_path)
-                count_file += 1
+            if os.path.isfile(p) or os.path.islink(p):
+                os.remove(p)
+                c1 += 1
             else:
-                shutil.rmtree(item_path)
-                count_dir += 1
+                shutil.rmtree(p)
+                c2 += 1
         except Exception as e:
-            log_func(f"  跳过（无权限）：{item} - {e}")
-    log_func(f"  已删除 {count_file} 个文件，{count_dir} 个文件夹")
+            log_func(f"  跳过：{item} - {e}")
+    log_func(f"  已删除 {c1} 个文件，{c2} 个文件夹")
 
 
 def safe_copy_folder(src, dst, log_func):
@@ -54,249 +53,240 @@ def safe_copy_folder(src, dst, log_func):
         if os.path.exists(dst):
             shutil.rmtree(dst)
         shutil.copytree(src, dst)
-        log_func(f"  复制完成：{src} → {dst}")
+        log_func(f"  复制完成")
         return True
     except Exception as e:
         log_func(f"  复制失败：{e}")
         return False
 
 
-# 颜色定义
-BG = "#2d2d2d"
-FG = "#e0e0e0"
-FRAME_BG = "#3d3d3d"
-ENTRY_BG = "#4d4d4d"
-BTN_BG = "#0066cc"
-BTN_HOVER = "#0088ff"
+# 颜色
+BG = "#1e1e1e"
+FG = "#d4d4d4"
+CARD = "#2d2d2d"
+INPUT = "#3c3c3c"
+BLUE = "#0078d4"
+RED = "#c42b1c"
 
 
 class App:
     def __init__(self, root):
         self.root = root
         self.root.title("OC插件 快速激活工具")
-        self.root.geometry("480x520")
+        self.root.geometry("460x540")
         self.root.resizable(False, False)
         self.root.configure(bg=BG)
 
         self.config = load_config()
-        self.setup_ui()
+        self.build_ui()
 
-    def create_button(self, parent, text, command, bg=BTN_BG, fg="white"):
-        btn = tk.Button(parent, text=text, command=command,
-                        bg=bg, fg=fg, font=("Microsoft YaHei", 11, "bold"),
-                        relief="flat", cursor="hand2", padx=10, pady=8)
-        btn.bind("<Enter>", lambda e: btn.config(bg=BTN_HOVER))
-        btn.bind("<Leave>", lambda e: btn.config(bg=bg))
-        return btn
+    # ---- 工具方法 ----
+    def btn(self, parent, text, cmd, bg=BLUE, fg="white", w=0, h=0):
+        """安全的按钮，不含 tuple 参数"""
+        kwargs = dict(text=text, command=cmd, bg=bg, fg=fg,
+                      font=("Microsoft YaHei", 11, "bold"),
+                      relief="flat", cursor="hand2",
+                      activebackground=bg, activeforeground=fg)
+        if w: kwargs["width"] = w
+        if h: kwargs["height"] = h
+        b = tk.Button(parent, **kwargs)
+        b.bind("<Enter>", lambda e: b.config(bg="#555"))
+        b.bind("<Leave>", lambda e: b.config(bg=bg))
+        return b
 
-    def create_label(self, parent, text, font=None):
-        return tk.Label(parent, text=text, bg=FRAME_BG, fg=FG,
+    def label(self, parent, text, fg=FG, bg=None, font=None):
+        return tk.Label(parent, text=text, bg=bg or BG, fg=fg,
                         font=font or ("Microsoft YaHei", 10))
 
-    def setup_ui(self):
-        # 标题
-        tk.Label(self.root, text="OC插件 快速激活工具",
-                 font=("Microsoft YaHei", 15, "bold"),
-                 bg=BG, fg="white", pady=(15, 10)).pack()
-
-        # 配置区
-        cfg = tk.LabelFrame(self.root, text=" 配置 ", bg=FRAME_BG, fg=FG,
-                            font=("Microsoft YaHei", 10, "bold"),
-                            padx=10, pady=10)
-        cfg.pack(fill="x", padx=15, pady=(0, 10))
-
-        # 用户名
-        self.create_label(cfg, "用户名：").grid(row=0, column=0, sticky="w", pady=5)
-        self.username_var = tk.StringVar(value=self.config.get("username", ""))
-        self.username_entry = tk.Entry(cfg, textvariable=self.username_var,
-                                        width=25, bg=ENTRY_BG, fg=FG,
-                                        insertbackground=FG,
-                                        relief="flat", bd=2)
-        self.username_entry.grid(row=0, column=1, sticky="w", padx=(8, 0), pady=5)
-
-        # octane 路径
-        self.create_label(cfg, "octane 复制目标：").grid(row=1, column=0, sticky="w", pady=5)
-        self.oct_var = tk.StringVar(value=self.config.get("octane_target", ""))
-        self.oct_entry = tk.Entry(cfg, textvariable=self.oct_var,
-                                   width=25, bg=ENTRY_BG, fg=FG,
-                                   insertbackground=FG,
-                                   relief="flat", bd=2)
-        self.oct_entry.grid(row=1, column=1, sticky="w", padx=(8, 5), pady=5)
-
-        sel_btn = tk.Button(cfg, text="选择", command=self.on_select_oct,
-                            bg=FRAME_BG, fg=FG, relief="flat",
-                            font=("Microsoft YaHei", 9))
-        sel_btn.grid(row=1, column=2, pady=5)
-
-        save_btn = tk.Button(cfg, text="保存配置", command=self.on_save_config,
-                             bg=BTN_BG, fg="white", relief="flat",
-                             font=("Microsoft YaHei", 10), padx=10)
-        save_btn.grid(row=2, column=0, columnspan=3, pady=(10, 0))
-
-        # 路径预览
-        preview = tk.LabelFrame(self.root, text=" 路径预览 ", bg=FRAME_BG, fg=FG,
-                                font=("Microsoft YaHei", 10, "bold"),
-                                padx=8, pady=8)
-        preview.pack(fill="x", padx=15, pady=(0, 10))
-
-        self.preview_text = tk.Text(preview, height=4, wrap="word",
-                                    font=("Consolas", 9),
-                                    bg=BG, fg=FG, insertbackground=FG,
-                                    relief="flat", bd=0)
-        self.preview_text.pack(fill="x")
-        self.refresh_preview()
-
-        # 实时刷新
-        self.username_entry.bind("<KeyRelease>", lambda e: self.refresh_preview())
-        self.oct_entry.bind("<KeyRelease>", lambda e: self.refresh_preview())
-
-        # 功能按钮
-        btn_frame = tk.LabelFrame(self.root, text=" 功能操作 ", bg=FRAME_BG, fg=FG,
-                                  font=("Microsoft YaHei", 10, "bold"),
-                                  padx=15, pady=15)
-        btn_frame.pack(fill="x", padx=15, pady=(0, 10))
-
-        self.create_button(btn_frame, "🗑  清空 OctaneRender 缓存",
-                           self.on_clean_all, bg="#cc4444").pack(pady=5, fill="x")
-
-        self.create_button(btn_frame, "📋  复制资源到目标路径",
-                           self.on_copy_all).pack(pady=5, fill="x")
-
-        # 日志区
-        log_frame = tk.LabelFrame(self.root, text=" 操作日志 ", bg=FRAME_BG, fg=FG,
-                                  font=("Microsoft YaHei", 10, "bold"),
-                                  padx=8, pady=8)
-        log_frame.pack(fill="both", expand=True, padx=15, pady=(0, 12))
-
-        self.log_text = tk.Text(log_frame, height=6, wrap="word",
-                                font=("Consolas", 9),
-                                bg=BG, fg=FG, insertbackground=FG,
-                                relief="flat", bd=0)
-        self.log_text.pack(side="left", fill="both", expand=True)
-
-        scrollbar = tk.Scrollbar(log_frame, command=self.log_text.yview)
-        scrollbar.pack(side="right", fill="y")
-        self.log_text.config(yscrollcommand=scrollbar.set)
-
-        # 底部信息
-        tk.Label(self.root, text=f"程序目录：{APP_DIR}",
-                 font=("Microsoft YaHei", 8),
-                 bg=BG, fg="#888").pack(pady=(0, 5))
-
-    def refresh_preview(self):
-        username = self.username_var.get().strip()
-        oct_target = self.oct_var.get().strip()
-
-        lines = [
-            ("清空 Local  ", f"C:\\Users\\{username}\\AppData\\Local\\OctaneRender"
-             if username else "(请填写用户名)"),
-            ("清空 Roaming", f"C:\\Users\\{username}\\AppData\\Roaming\\OctaneRender"
-             if username else "(请填写用户名)"),
-            ("复制 AppData", f"{os.path.join(APP_DIR, 'AppData')}  →  C:\\Users\\{username if username else '(请填写用户名)'}\\AppData"),
-            ("复制 octane  ", f"{os.path.join(APP_DIR, 'octane')}  →  {oct_target if oct_target else '(请填写目标路径)'}"),
-        ]
-        text = "\n".join(f"{label}：{path}" for label, path in lines)
-        self.preview_text.config(state="normal")
-        self.preview_text.delete("1.0", "end")
-        self.preview_text.insert("1.0", text)
-        self.preview_text.config(state="disabled")
-
     def log(self, msg):
-        self.log_text.insert("end", msg + "\n")
-        self.log_text.see("end")
+        self.log_box.insert("end", msg + "\n")
+        self.log_box.see("end")
         self.root.update_idletasks()
 
-    def get_username(self):
-        username = self.username_var.get().strip()
-        if not username:
+    def get_user(self):
+        u = self.u_var.get().strip()
+        if not u:
             messagebox.showerror("错误", "请先填写用户名！")
             return None
-        return username
+        return u
 
-    def on_save_config(self):
-        self.config["username"] = self.username_var.get().strip()
-        self.config["octane_target"] = self.oct_var.get().strip()
+    # ---- 界面 ----
+    def build_ui(self):
+        # ── 标题 ──
+        self.label(self.root, "OC插件 快速激活工具",
+                   fg="white", font=("Microsoft YaHei", 15, "bold")
+                   ).pack(pady=(18, 0))
+
+        # ── 配置卡片 ──
+        c1 = tk.Frame(self.root, bg=CARD, bd=1, relief="groove")
+        c1.pack(fill="x", padx=16, pady=14)
+
+        self.label(c1, "配置", fg="white",
+                   font=("Microsoft YaHei", 10, "bold")).pack(pady=(8, 0))
+
+        r1 = tk.Frame(c1, bg=CARD)
+        r1.pack(fill="x", padx=12, pady=(8, 4))
+        self.label(r1, "用户名：", bg=CARD).pack(side="left")
+        self.u_var = tk.StringVar(value=self.config.get("username", ""))
+        ue = tk.Entry(r1, textvariable=self.u_var, width=22,
+                      bg=INPUT, fg=FG, insertbackground=FG,
+                      relief="flat", bd=2)
+        ue.pack(side="left", padx=8)
+        ue.bind("<KeyRelease>", lambda e: self.refresh())
+
+        r2 = tk.Frame(c1, bg=CARD)
+        r2.pack(fill="x", padx=12, pady=(4, 8))
+        self.label(r2, "octane 目标：", bg=CARD).pack(side="left")
+        self.o_var = tk.StringVar(value=self.config.get("octane_target", ""))
+        oe = tk.Entry(r2, textvariable=self.o_var, width=16,
+                      bg=INPUT, fg=FG, insertbackground=FG,
+                      relief="flat", bd=2)
+        oe.pack(side="left", padx=8)
+        oe.bind("<KeyRelease>", lambda e: self.refresh())
+        tk.Button(r2, text="选", command=self.pick_oct,
+                  bg="#555", fg="white", relief="flat",
+                  font=("Microsoft YaHei", 9), padx=6, pady=2).pack(side="left")
+
+        tk.Button(c1, text="保存配置", command=self.save_cfg,
+                  bg=BLUE, fg="white", relief="flat",
+                  font=("Microsoft YaHei", 10), padx=12, pady=2).pack(pady=(0, 8))
+
+        # ── 预览 ──
+        c2 = tk.Frame(self.root, bg=CARD, bd=1, relief="groove")
+        c2.pack(fill="x", padx=16, pady=(0, 12))
+
+        self.label(c2, "路径预览", fg="white",
+                   font=("Microsoft YaHei", 10, "bold")).pack(pady=(6, 0))
+        self.pv = tk.Text(c2, height=4, wrap="word",
+                          font=("Consolas", 9),
+                          bg=BG, fg=FG, insertbackground=FG,
+                          relief="flat", bd=0)
+        self.pv.pack(fill="x", padx=8, pady=(4, 8))
+        self.refresh()
+
+        # ── 按钮 ──
+        c3 = tk.Frame(self.root, bg=CARD, bd=1, relief="groove")
+        c3.pack(fill="x", padx=16, pady=(0, 12))
+
+        self.label(c3, "功能操作", fg="white",
+                   font=("Microsoft YaHei", 10, "bold")).pack(pady=(6, 0))
+
+        inner = tk.Frame(c3, bg=CARD)
+        inner.pack(padx=12, pady=8, fill="x")
+
+        self.btn(inner, "🗑  清空 OctaneRender 缓存",
+                 self.do_clean, bg=RED).pack(pady=4, fill="x")
+        self.btn(inner, "📋  复制资源到目标路径",
+                 self.do_copy).pack(pady=4, fill="x")
+
+        # ── 日志 ──
+        c4 = tk.Frame(self.root, bg=CARD, bd=1, relief="groove")
+        c4.pack(fill="both", expand=True, padx=16, pady=(0, 12))
+
+        self.label(c4, "操作日志", fg="white",
+                   font=("Microsoft YaHei", 10, "bold")).pack(pady=(6, 0))
+
+        lf = tk.Frame(c4, bg=BG)
+        lf.pack(fill="both", expand=True, padx=8, pady=(4, 8))
+
+        self.log_box = tk.Text(lf, height=6, wrap="word",
+                               font=("Consolas", 9),
+                               bg=BG, fg=FG, insertbackground=FG,
+                               relief="flat", bd=0)
+        self.log_box.pack(side="left", fill="both", expand=True)
+        sb = tk.Scrollbar(lf, command=self.log_box.yview)
+        sb.pack(side="right", fill="y")
+        self.log_box.config(yscrollcommand=sb.set)
+
+        # ── 底部 ──
+        self.label(self.root, f"程序目录：{APP_DIR}",
+                   fg="#666", font=("Microsoft YaHei", 8)
+                   ).pack(pady=(0, 6))
+
+    # ---- 方法 ----
+    def refresh(self):
+        u = self.u_var.get().strip()
+        o = self.o_var.get().strip()
+        lines = [
+            ("清空", f"C:\\Users\\{u}\\AppData\\Local\\OctaneRender" if u else "(待填写)"),
+            ("清空", f"C:\\Users\\{u}\\AppData\\Roaming\\OctaneRender" if u else "(待填写)"),
+            ("复制", f"{os.path.join(APP_DIR, 'AppData')}  →  C:\\Users\\{u if u else '(待填写)'}\\AppData"),
+            ("复制", f"{os.path.join(APP_DIR, 'octane')}  →  {o if o else '(待填写)'}"),
+        ]
+        t = "\n".join(f"{a}：{b}" for a, b in lines)
+        self.pv.config(state="normal")
+        self.pv.delete("1.0", "end")
+        self.pv.insert("1.0", t)
+        self.pv.config(state="disabled")
+
+    def save_cfg(self):
+        self.config["username"] = self.u_var.get().strip()
+        self.config["octane_target"] = self.o_var.get().strip()
         save_config(self.config)
-        messagebox.showinfo("成功", "配置已保存！")
 
-    def on_select_oct(self):
-        path = filedialog.askdirectory(title="选择 octane 复制目标文件夹")
-        if path:
-            self.oct_var.set(path)
-            self.config["octane_target"] = path
-            save_config(self.config)
-            self.refresh_preview()
+    def pick_oct(self):
+        p = filedialog.askdirectory(title="选择 octane 复制目标")
+        if p:
+            self.o_var.set(p)
+            self.config["octane_target"] = p
+            self.refresh()
 
-    def on_clean_all(self):
-        username = self.get_username()
-        if not username:
+    def do_clean(self):
+        u = self.get_user()
+        if not u:
             return
         paths = [
-            f"C:\\Users\\{username}\\AppData\\Local\\OctaneRender",
-            f"C:\\Users\\{username}\\AppData\\Roaming\\OctaneRender",
+            f"C:\\Users\\{u}\\AppData\\Local\\OctaneRender",
+            f"C:\\Users\\{u}\\AppData\\Roaming\\OctaneRender",
         ]
         if not messagebox.askyesno(
-                "确认清空",
-                f"将清空以下两个目录的所有内容：\n\n{paths[0]}\n{paths[1]}\n\n此操作不可撤销！"):
+                "确认", f"清空以下两个目录所有内容？\n\n{paths[0]}\n{paths[1]}\n\n不可撤销！"):
             return
         for p in paths:
             self.log(f"[清理] {p}")
             safe_clean_folder(p, self.log)
-        self.log("✅ 全部清理完成\n")
-        messagebox.showinfo("完成", "OctaneRender 缓存已全部清空！")
+        self.log("✅ 完成\n")
 
-    def on_copy_all(self):
-        username = self.get_username()
-        if not username:
+    def do_copy(self):
+        u = self.get_user()
+        if not u:
             return
-        oct_target = self.oct_var.get().strip()
-        if not oct_target:
-            messagebox.showerror("错误", "请先填写或选择 octane 复制目标路径！")
+        ot = self.o_var.get().strip()
+        if not ot:
+            messagebox.showerror("错误", "请填写 octane 复制目标路径！")
             return
-
-        src_appdata = os.path.join(APP_DIR, "AppData")
-        dst_appdata = f"C:\\Users\\{username}\\AppData"
-
-        if not messagebox.askyesno("确认复制", f"将复制以下内容到目标路径：\n\n"
-                                   f"AppData：{src_appdata}  →  {dst_appdata}\n"
-                                   f"octane ：{os.path.join(APP_DIR, 'octane')}  →  {oct_target}\n\n"
-                                   f"继续吗？"):
+        src_a = os.path.join(APP_DIR, "AppData")
+        dst = f"C:\\Users\\{u}\\AppData"
+        src_o = os.path.join(APP_DIR, "octane")
+        dst_o = os.path.join(ot, "octane")
+        if not messagebox.askyesno(
+                "确认", f"复制 AppData → {dst}\n复制 octane → {ot}\n\n继续？"):
             return
-
-        # 复制 AppData
-        if os.path.exists(src_appdata):
-            self.log(f"[复制 AppData] {src_appdata} → {dst_appdata}")
+        if os.path.exists(src_a):
+            self.log(f"[AppData] 开始")
             try:
-                if not os.path.exists(dst_appdata):
-                    os.makedirs(dst_appdata, exist_ok=True)
-                for item in os.listdir(src_appdata):
-                    s = os.path.join(src_appdata, item)
-                    d = os.path.join(dst_appdata, item)
+                if not os.path.exists(dst):
+                    os.makedirs(dst, exist_ok=True)
+                for item in os.listdir(src_a):
+                    s = os.path.join(src_a, item)
+                    d = os.path.join(dst, item)
                     if os.path.isfile(s):
                         shutil.copy2(s, d)
-                        self.log(f"  已复制文件：{item}")
                     else:
                         if os.path.exists(d):
                             shutil.rmtree(d)
                         shutil.copytree(s, d)
-                        self.log(f"  已复制文件夹：{item}")
-                self.log("  ✅ AppData 复制完成")
+                self.log("  ✅ AppData 完成")
             except Exception as e:
-                self.log(f"  ❌ 失败：{e}")
+                self.log(f"  ❌ {e}")
         else:
-            self.log(f"  ⚠ AppData 文件夹不存在，跳过")
-
-        # 复制 octane
-        src_oct = os.path.join(APP_DIR, "octane")
-        dst_oct = os.path.join(oct_target, "octane")
-        if os.path.exists(src_oct):
-            self.log(f"[复制 octane] {src_oct} → {dst_oct}")
-            safe_copy_folder(src_oct, dst_oct, self.log)
+            self.log("  ⚠ AppData 不存在，跳过")
+        if os.path.exists(src_o):
+            self.log(f"[octane] 开始")
+            safe_copy_folder(src_o, dst_o, self.log)
         else:
-            self.log(f"  ⚠ octane 文件夹不存在，跳过")
-
-        self.log("✅ 全部复制完成\n")
-        messagebox.showinfo("完成", "资源复制完成！")
+            self.log("  ⚠ octane 不存在，跳过")
+        self.log("✅ 全部完成\n")
 
 
 def main():
