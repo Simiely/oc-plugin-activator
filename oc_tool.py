@@ -1,6 +1,7 @@
 import os
 import sys
 import shutil
+import webbrowser
 import tkinter as tk
 from tkinter import filedialog, messagebox
 
@@ -147,14 +148,13 @@ class App:
         guide = tk.Frame(self.root, bg=CARD, bd=1, relief="groove")
         guide.grid(row=row, column=0, padx=16, pady=(0, 6), sticky="ew"); row += 1
         guide_text = (
-            "① 点击「自动」获取当前 Windows 用户名\n"
-            "② 选择 octane 在 C4D 中的安装目录\n"
-            "③ 先「清空」移除 OctaneRender 残留文件\n"
-            "④ 后「复制」部署 thirdparty、OctaneRender 等资源\n"
-            "⑤ 保持 YellowStar.exe 程序运行\n"
-            "⑥ 运行 C4D 使用 Octane 插件\n"
-            "⑦ (可选) 把 YellowStar 放入启动路径，开机自动运行\n"
-            "插件失效时，重复③④即可恢复。"
+            "① 选择 octane 在 C4D 中的安装目录\n"
+            "② 先「清空」移除 OctaneRender 残留文件\n"
+            "③ 后「复制」部署 thirdparty、OctaneRender 等资源\n"
+            "④ 保持 YellowStar.exe 程序运行\n"
+            "⑤ 运行 C4D 使用 Octane 插件\n"
+            "⑥ (可选) 把 YellowStar 放入启动路径，开机自动运行\n"
+            "插件失效时，重复②③即可恢复。"
         )
         tk.Label(guide, text=guide_text, justify="left",
                  bg=CARD, fg="#aaa", font=("Microsoft YaHei", 9),
@@ -185,11 +185,6 @@ class App:
         ue.pack(side="left", padx=8)
         ue.bind("<KeyRelease>", lambda e: self.refresh())
 
-        # 自动获取按钮
-        tk.Button(r1, text="① 自动", command=self.fill_username,
-                  bg="#555", fg="white", relief="flat",
-                  font=("Microsoft YaHei", 9), padx=6, pady=1).pack(side="left")
-
         # octane 目标行
         r2 = tk.Frame(c1, bg=CARD)
         r2.pack(fill="x", padx=12, pady=(4, 4))
@@ -200,7 +195,7 @@ class App:
                       relief="flat", bd=2)
         oe.pack(side="left", padx=8)
         oe.bind("<KeyRelease>", lambda e: self.refresh())
-        tk.Button(r2, text="② 浏览", command=self.pick_oct,
+        tk.Button(r2, text="① 浏览", command=self.pick_oct,
                   bg="#555", fg="white", relief="flat",
                   font=("Microsoft YaHei", 9), padx=6, pady=1).pack(side="left")
 
@@ -234,20 +229,20 @@ class App:
         # "打开文件夹" 右对齐小按钮
         open_row = tk.Frame(inner, bg=CARD)
         open_row.pack(fill="x", pady=(0, 8))
-        tk.Button(open_row, text="📂 打开启动路径",
+        tk.Button(open_row, text="⑦ 📂 打开启动路径",
                   command=lambda: self.open_dir(
                       "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\StartUp"),
                   bg="#555", fg="white", relief="flat",
-                  font=("Microsoft YaHei", 9), padx=8, pady=2).pack(side="right", padx=(0, 6))
+                  font=("Microsoft YaHei", 9), padx=8, pady=2).pack(side="right", padx=(0, 8))
         tk.Button(open_row, text="📂 打开 OctaneRender 文件夹",
                   command=self.open_octane_dirs,
                   bg="#555", fg="white", relief="flat",
-                  font=("Microsoft YaHei", 9), padx=8, pady=2).pack(side="right")
+                  font=("Microsoft YaHei", 9), padx=8, pady=2).pack(side="right", padx=0)
 
-        self.btn(inner, "③ 清空 OctaneRender 残留文件",
+        self.btn(inner, "② 清空 OctaneRender 残留文件",
                  self.do_clean, bg=RED).pack(pady=4, fill="x")
 
-        self.btn(inner, "④ 复制资源到目标路径",
+        self.btn(inner, "③ 复制资源到目标路径",
                  self.do_copy).pack(pady=4, fill="x")
 
         # ── 日志区 ──
@@ -281,17 +276,15 @@ class App:
             bg=BG, fg="#888", font=("Microsoft YaHei", 8))
         url_label1.grid(row=row, column=0, pady=(0, 0)); row += 1
 
-        def copy_url(e):
-            self.root.clipboard_clear()
-            self.root.clipboard_append("https://github.com/Simiely/oc-plugin-activator")
-            messagebox.showinfo("", "已复制开源地址")
+        def open_url(e):
+            webbrowser.open("https://github.com/Simiely/oc-plugin-activator")
 
         url_label2 = tk.Label(
             self.root,
             text="https://github.com/Simiely/oc-plugin-activator",
             bg=BG, fg="#888", font=("Microsoft YaHei", 8), cursor="hand2")
         url_label2.grid(row=row, column=0, pady=(0, 8)); row += 1
-        url_label2.bind("<Button-1>", copy_url)
+        url_label2.bind("<Button-1>", open_url)
         url_label2.bind("<Enter>", lambda e: url_label2.config(fg="#aaa"))
         url_label2.bind("<Leave>", lambda e: url_label2.config(fg="#888"))
 
