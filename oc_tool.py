@@ -147,6 +147,9 @@ class App:
         # ── 使用说明 ──
         guide = tk.Frame(self.root, bg=CARD, bd=1, relief="groove")
         guide.grid(row=row, column=0, padx=16, pady=(0, 6), sticky="ew"); row += 1
+        tk.Label(guide, text="确保当前程序目录包含：octane、OctaneRender、thirdparty 文件夹",
+                 bg=CARD, fg="#ffcc00", font=("Microsoft YaHei", 10, "bold")
+                 ).pack(pady=(6, 2), padx=10, fill="x")
         guide_text = (
             "① 选择 octane 在 C4D 中的安装目录\n"
             "② 先「清空」移除 OctaneRender 残留文件\n"
