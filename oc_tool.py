@@ -166,8 +166,8 @@ class App:
         # ── 配置卡片 ──
         c1 = tk.Frame(self.root, bg=CARD, bd=1, relief="groove")
         c1.grid(row=row, column=0, padx=16, pady=12, sticky="ew"); row += 1
-        self.lbl(c1, "配置", fg="white", font=("Microsoft YaHei", 10, "bold")
-                 ).pack(pady=(8, 0))
+        tk.Label(c1, text="配置", bg=CARD, fg="white", anchor="w",
+                 font=("Microsoft YaHei", 10, "bold")).pack(pady=(8, 0), padx=4)
 
         # 配置表单项（grid 对齐）
         cfg_grid = tk.Frame(c1, bg=CARD)
@@ -176,7 +176,7 @@ class App:
 
         # 用户名行
         tk.Label(cfg_grid, text="用户名：", bg=CARD, fg=FG,
-                 font=("Microsoft YaHei", 10), width=10, anchor="w"
+                 font=("Microsoft YaHei", 10), width=10, anchor="e"
                  ).grid(row=0, column=0, sticky="e", pady=5)
 
         saved_username = self.config.get("username", "")
@@ -192,8 +192,8 @@ class App:
 
         # octane 目标行
         tk.Label(cfg_grid, text="octane目录：", bg=CARD, fg=FG,
-                 font=("Microsoft YaHei", 10), width=10, anchor="w"
-                 ).grid(row=1, column=0, sticky="e", pady=5, padx=(10, 0))
+                 font=("Microsoft YaHei", 10), width=10, anchor="e"
+                 ).grid(row=1, column=0, sticky="e", pady=5)
 
         self.o_var = tk.StringVar(value=self.config.get("octane_target", ""))
         oe = tk.Entry(cfg_grid, textvariable=self.o_var,
@@ -215,8 +215,8 @@ class App:
         # ── 路径预览 ──
         c2 = tk.Frame(self.root, bg=CARD, bd=1, relief="groove")
         c2.grid(row=row, column=0, padx=16, pady=(0, 10), sticky="ew"); row += 1
-        self.lbl(c2, "路径预览", fg="white",
-                 font=("Microsoft YaHei", 10, "bold")).pack(pady=(6, 0))
+        tk.Label(c2, text="路径预览", bg=BG, fg=FG, anchor="w",
+                 font=("Microsoft YaHei", 10, "bold")).pack(pady=(6, 0), padx=4)
         self.pv = tk.Text(c2, height=4, wrap="word",
                           font=("Consolas", 9),
                           bg=BG, fg=FG, insertbackground=FG,
@@ -227,8 +227,8 @@ class App:
         # ── 功能按钮 ──
         c3 = tk.Frame(self.root, bg=CARD, bd=1, relief="groove")
         c3.grid(row=row, column=0, padx=16, pady=(0, 10), sticky="ew"); row += 1
-        self.lbl(c3, "功能操作", fg="white",
-                 font=("Microsoft YaHei", 10, "bold")).pack(pady=(6, 0))
+        tk.Label(c3, text="功能操作", bg=CARD, fg="white", anchor="w",
+                 font=("Microsoft YaHei", 10, "bold")).pack(pady=(6, 0), padx=4)
 
         inner = tk.Frame(c3, bg=CARD)
         inner.pack(padx=12, pady=8, fill="x")
@@ -260,9 +260,9 @@ class App:
         c4.grid_columnconfigure(0, weight=1)
         row += 1
 
-        self.lbl(c4, "操作日志", fg="white",
+        tk.Label(c4, text="操作日志", bg=CARD, fg="white", anchor="w",
                  font=("Microsoft YaHei", 10, "bold")
-                 ).grid(row=0, column=0, pady=(6, 0))
+                 ).grid(row=0, column=0, pady=(6, 0), padx=4)
 
         lf = tk.Frame(c4, bg=BG, bd=1, relief="sunken")
         lf.grid(row=1, column=0, padx=8, pady=(4, 8), sticky="nsew")
