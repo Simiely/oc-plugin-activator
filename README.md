@@ -1,12 +1,3 @@
-> [!IMPORTANT]
-> ## 📦 本仓库已归档 —— 请到统一仓库下载
-> 本插件已并入 **[Simiely/c4d-tools](https://github.com/Simiely/c4d-tools)**（`tools/oc-plugin-activator/`），
-> 后续更新与问题修复都在 c4d-tools 统一维护，**本仓库只读、不再更新**。
->
-> 最新版源码：https://github.com/Simiely/c4d-tools/tree/main/tools/oc-plugin-activator
-
----
-
 # OC插件 快速激活工具
 
 [![Build Windows EXE](https://github.com/Simiely/oc-plugin-activator/actions/workflows/build-exe.yml/badge.svg)](https://github.com/Simiely/oc-plugin-activator/actions/workflows/build-exe.yml)
@@ -55,3 +46,7 @@
 | [`AGENTS.md`](./AGENTS.md) | AI / 未来的你 | 技术栈、7 条关键坑（PyInstaller 路径/ttk/锁文件）、构建命令 |
 | [`DEVELOP.md`](./DEVELOP.md) | 开发者 | 8 条问题记录 |
 | [`CHANGELOG.md`](./CHANGELOG.md) | 所有人 | 版本变更记录 |
+
+---
+
+> 🔖 本仓库为**唯一源码源**；本工具属 PC 工具，索引见 [`Simiely/pc-tools`](https://github.com/Simiely/pc-tools)。
