@@ -1,5 +1,6 @@
 # AGENTS.md · 项目规则
 
+> 📌 **文档基线**：2026-11-17（commit `3b312ed`）接入单项目规范机器层（link-only）；DEVELOP.md 更名 DEVELOPMENT.md
 > 给 AI / 未来的你：只记代码里看不出的关键信息。详细问题记录见 [DEVELOPMENT.md](DEVELOPMENT.md)（8 条一坑一篇）。
 
 ## 技术栈
