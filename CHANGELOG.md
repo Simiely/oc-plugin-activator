@@ -4,6 +4,7 @@
 
 ## 功能里程碑
 
+- **接入文档检查（2026-11-17）**：接入单项目规范（spec 2.1.3 / repo-kit 2.7.2，`link-only`）；新增 `schema/`、`tools/repo-kit/`、`kit.lock` 与 CI；只查链接，不要求 frontmatter；既有 `build-exe.yml` 保持不变，新增的 `repo-check.yml` 与之并存
 - **OC 插件快速激活工具**：一键清空 OctaneRender 缓存、复制 AppData 和 c4doctane 文件夹的 Windows 工具（oc_tool.py 单文件 + icon.ico + config.json 自动生成）
 - **超椭圆圆角图标**（n=3，小米风格）：PIL numpy 处理透明度 + ImageMagick 多尺寸 ICO
 - **CI/CD**：GitHub Actions 构建 exe（build-exe.yml）+ onepage 落地页部署（deploy-onepage.yml）
