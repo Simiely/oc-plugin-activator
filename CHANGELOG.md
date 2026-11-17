@@ -1,6 +1,6 @@
 # CHANGELOG.md · 版本记录
 
-> 项目无正式版本 tag，按功能迭代记录。完整问题记录见 [DEVELOP.md](DEVELOP.md)。
+> 项目无正式版本 tag，按功能迭代记录。完整问题记录见 [DEVELOPMENT.md](DEVELOPMENT.md)。
 
 ## 功能里程碑
 

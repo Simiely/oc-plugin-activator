@@ -44,7 +44,7 @@
 | 文档 | 给谁看 | 内容 |
 |---|---|---|
 | [`AGENTS.md`](./AGENTS.md) | AI / 未来的你 | 技术栈、7 条关键坑（PyInstaller 路径/ttk/锁文件）、构建命令 |
-| [`DEVELOP.md`](./DEVELOP.md) | 开发者 | 8 条问题记录 |
+| [`DEVELOPMENT.md`](./DEVELOPMENT.md) | 开发者 | 8 条问题记录 |
 | [`CHANGELOG.md`](./CHANGELOG.md) | 所有人 | 版本变更记录 |
 
 ---

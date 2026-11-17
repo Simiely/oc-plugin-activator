@@ -1,6 +1,6 @@
 # AGENTS.md · 项目规则
 
-> 给 AI / 未来的你：只记代码里看不出的关键信息。详细问题记录见 [DEVELOP.md](DEVELOP.md)（8 条一坑一篇）。
+> 给 AI / 未来的你：只记代码里看不出的关键信息。详细问题记录见 [DEVELOPMENT.md](DEVELOPMENT.md)（8 条一坑一篇）。
 
 ## 技术栈
 
